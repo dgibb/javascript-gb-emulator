@@ -1351,7 +1351,8 @@ var ret_nz = function(){
 
 //0xC1
 var pop_bc = function{
-	b=memory.readWord(sp);
+	b=memory.readByte(sp);
+	c=memory.readByte(sp+1);
 	sp+=2;
 	m=1;
 	t=12;
@@ -1369,7 +1370,7 @@ var jp_nz_nn = function(){
 }
 
 //0xC3
-var jp_nn =function90{
+var jp_nn = function(){
 	pc=memory.readWord(pc+1);
 	m=3;
 	t=16;
@@ -1377,8 +1378,59 @@ var jp_nn =function90{
 
 //0xC4
 var call_nz_nn = function(){
+	m=3;
+	if(!zeroFlag()){
+	memory.writeWord(pc+2,sp);
+	pc=memory.readWord(pc+1);
+	t=24;
+	}else{
+	t=12;
+	pc+=2
 }
 
+//0xC5
+var push_bc = function(){
+	memory.writeByte(b, sp);
+	memory.writeByte(b,sp-1);
+	sp-=2;
+	m=1;
+	t=16;
+}
+
+//0xC6
+var add_a_n = function(){
+	var result=a+readByte(pc+1);
+	if (result > 255){setCarryFlag();}
+	if(((a&0x0F) + (d&0x0F))&0x10){setHalfFlag();}else {resetHalfFlag();}
+	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
+	a=(result&0x00ff);
+	m=1;
+	t=4;
+	resetSubFlag();
+}
+
+//0xC7
+var rst_0 = function(){
+	memory.writeWord(pc, sp);
+	sp-=2;
+	pc=0x0000
+	m=1;
+	t=16;
+}
+
+//0xC8
+var ret_z = function(){
+	m=1;
+	if(zeroFlag){
+    var addr=memory.readbyte(sp);
+	addr << 8;
+	addr+= readByte(sp+1);
+	sp+=2;
+	pc=addr;
+	t=20
+	}
+	t=8;
+}
 
 //helper functions
 
