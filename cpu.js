@@ -12,7 +12,6 @@ var h;
 var l;
 var f; //flags
 
-
 //program counter and stack pointer (16 bit)
 var pc;
 var sp;
@@ -20,6 +19,9 @@ var sp;
 //clocks
 var m;
 var t;
+
+//interupts
+var i;
 
 //instruction array
 var oneByteInstructions = [nop(), //0x00
@@ -1344,6 +1346,7 @@ var ret_nz = function(){
 	if (!zeroFlag()){
 	pc=memory.readWord(sp);
 	t=20;
+	sp+=2;
 	}else{
 	t=8;
 	}
@@ -1351,8 +1354,8 @@ var ret_nz = function(){
 
 //0xC1
 var pop_bc = function{
-	b=memory.readByte(sp);
 	c=memory.readByte(sp+1);
+	b=memory.readByte(sp+2);
 	sp+=2;
 	m=1;
 	t=12;
@@ -1363,6 +1366,7 @@ var jp_nz_nn = function(){
 	if(!zeroFlag()){
 	pc=memory.readWord(pc+1);
 	t=16;
+	m=1;
 	}else{
 	t=12;
 	m=3;
@@ -1380,7 +1384,7 @@ var jp_nn = function(){
 var call_nz_nn = function(){
 	m=3;
 	if(!zeroFlag()){
-	memory.writeWord(pc+2,sp);
+	memory.writeWord(pc+3,sp);
 	pc=memory.readWord(pc+1);
 	t=24;
 	}else{
@@ -1399,9 +1403,10 @@ var push_bc = function(){
 
 //0xC6
 var add_a_n = function(){
-	var result=a+readByte(pc+1);
+	var value =readByte(pc+1);
+	var result=a+value;
 	if (result > 255){setCarryFlag();}
-	if(((a&0x0F) + (d&0x0F))&0x10){setHalfFlag();}else {resetHalfFlag();}
+	if(((a&0x0F) + (value&0x0F))&0x10){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	a=(result&0x00ff);
 	m=1;
@@ -1411,7 +1416,7 @@ var add_a_n = function(){
 
 //0xC7
 var rst_0 = function(){
-	memory.writeWord(pc, sp);
+	memory.writeWord(pc+1, sp);
 	sp-=2;
 	pc=0x0000
 	m=1;
@@ -1432,7 +1437,252 @@ var ret_z = function(){
 	t=8;
 }
 
-//helper functions
+//0xC9
+var ret = function(){
+	var addr=memory.readbyte(sp);
+	addr << 8;
+	addr+= readByte(sp+1);
+	sp+=2;
+	pc=addr;
+	m=1;
+	t=16;
+}
+
+//0xCA
+var jp_z_nn = function(){
+	if(zeroFlag()){
+	pc=memory.readWord(pc+1);
+	t=16;
+	m=1;
+	}else{
+	t=12;
+	m=3;
+	}
+}
+
+//0xCB
+var ext_ops = function(){
+	twoByteInstructions[memory.readByte(pc+1)]();
+	m+=1;
+	t+=4;
+}
+
+//0xCC
+var call_z_nn = function(){
+	m=3;
+	if(zeroFlag()){
+	memory.writeWord(pc+3,sp);
+	pc=memory.readWord(pc+1);
+	t=24;
+	}else{
+	t=12;
+	pc+=2
+}
+
+//0xCD
+var call_nn = function(){
+	memory.writeWord(pc+3,sp);
+	pc=memory.readWord(pc+1);
+	t=24;
+	m=3;
+}
+
+//0xCE
+var adc_a_n = function
+	var value=memory.readByte(pc+1);
+	var result= a+value;
+	if(CarryFlag()){result+=1;}
+	if (result & 0xff00){setCarryFlag();}
+	if(((a&0x0F) + (value&0x0F))&0x10){setHalfFlag();}else {resetHalfFlag();}
+	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
+	a=(result&0x00ff);
+	m=2;
+	t=8;
+	resetSubFlag();
+}
+
+//0xCF
+var rst_8 =  function(){
+	memory.writeWord(pc+1, sp);
+	sp-=2;
+	pc=0x0008
+	m=1;
+	t=16;
+}
+
+//0xD0
+var ret_nc = function(){
+	m=1;
+	if (!carryFlag()){
+	pc=memory.readWord(sp);
+	t=20;
+	sp+=2;
+	}else{
+	t=8;
+	}
+}
+
+//0xD1
+var pop_de = function{
+	e=memory.readByte(sp+1);
+	d=memory.readByte(sp+2);
+	sp+=2;
+	m=1;
+	t=12;
+}
+
+//0xD2
+var jp_nc_nn = function(){
+	if(!carryFlag()){
+	pc=memory.readWord(pc+1);
+	t=16;
+	m=1;
+	}else{
+	t=12;
+	m=3;
+	}
+}
+
+//0xD3, 0XDB, 0xDD, 0xE3, 0xE4, 0xEB, 0xEC, 0xED, 0xF, 0xFC, 0xFD
+var unused = function(){
+	var iv = memory.readByte(pc);
+	console.log("invalid opcode ", iv);
+}
+
+//0xD4
+ar call_nc_nn = function(){
+	m=3;
+	if(!carryFlag()){
+	memory.writeWord(pc+3,sp);
+	pc=memory.readWord(pc+1);
+	t=24;
+	}else{
+	t=12;
+	pc+=2
+}
+
+//0xD5
+var push_de = function(){
+	memory.writeByte(d, sp);
+	memory.writeByte(e,sp-1);
+	sp-=2;
+	m=1;
+	t=16;
+}
+
+//0xD6
+var sub_a_n = function(){
+	var value = readByte(pc+1);
+	var result=a-value;
+	if (result < 0){setCarryFlag();}
+	if(a&0x0F < value&0x0F){setHalfFlag();}else {resetHalfFlag();}
+	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
+	a=(result&0x00ff);
+	m=1;
+	t=4;
+	setSubFlag();
+}
+
+//0xD7
+var rst_10 = function(){
+	memory.writeWord(pc+1, sp);
+	sp-=2;
+	pc=0x0010
+	m=1;
+	t=16;
+}
+
+//0xD8
+var ret_c = function(){
+	m=1;
+	if(carryFlag){
+    var addr=memory.readbyte(sp);
+	addr << 8;
+	addr+= readByte(sp+1);
+	sp+=2;
+	pc=addr;
+	t=20
+	}
+	t=8;
+}
+
+//0xD9
+var reti = function(){
+	i=true;
+	var addr=memory.readbyte(sp);
+	addr << 8;
+	addr+= readByte(sp+1);
+	sp+=2;
+	pc=addr;
+	m=1;
+	t=16;
+}
+
+//0xDA
+var jp_c_nn = function(){
+	if(carryFlag()){
+	pc=memory.readWord(pc+1);
+	t=16;
+	m=1;
+	}else{
+	t=12;
+	m=3;
+	}
+}
+
+//0xDB
+//unused
+
+//0xDC
+var call_c_nn = function(){
+	m=3;
+	if(carryFlag()){
+	memory.writeWord(pc+3,sp);
+	pc=memory.readWord(pc+1);
+	t=24;
+	}else{
+	t=12;
+	pc+=2
+}
+
+//0xDD
+//unused
+
+//0xDE
+var sbc_a_n = function(){
+	var value=memory.readByte(pc+1);
+	var result=a - value;
+	if(CarryFlag()){result-=1;}
+	if (result < 0){setCarryFlag();}
+	if(a&0x0F < value&0x0F){setHalfFlag();}else {resetHalfFlag();}
+	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
+	a=(result&0x00ff);
+	m=1;
+	t=4;
+	setSubFlag();
+}
+//0xDF
+var rst_18 =  function(){
+	memory.writeWord(pc+1, sp);
+	sp-=2;
+	pc=0x0018
+	m=1;
+	t=16;
+}
+
+//0xE0
+var ldh_n_a = function(){
+	a=memory.readByte(pc+1);
+	m=2;
+	t=12;
+}
+	
+
+
+//------------------//
+//-helper functions-//
+//------------------//
+
 
 var zeroFlag = function(){
 	if(f&0x80){return true;}
@@ -1492,4 +1742,3 @@ var getAddr = function(a,b){ //finds and returns combined address of two 8bit re
 	addr+=b;
 	return addr;
 }
-
