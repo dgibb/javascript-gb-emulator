@@ -1661,6 +1661,7 @@ var sbc_a_n = function(){
 	t=4;
 	setSubFlag();
 }
+
 //0xDF
 var rst_18 =  function(){
 	memory.writeWord(pc+1, sp);
@@ -1677,6 +1678,105 @@ var ldh_n_a = function(){
 	t=12;
 }
 	
+//0xE1
+var pop_hl = function{
+	l=memory.readByte(sp+1);
+	h=memory.readByte(sp+2);
+	sp+=2;
+	m=1;
+	t=12;
+}
+
+//0xE2
+var ldh_c_a = function(){
+	var addr = 0xFF00 + c;
+	memory.writebye(a, addr);
+	m=2;
+	t=8
+}
+
+//0xE3, 0xE4
+//unused
+
+//0xE5
+var push_hl = function(){
+	memory.writeByte(h, sp);
+	memory.writeByte(l,sp-1);
+	sp-=2;
+	m=1;
+	t=16;
+}
+
+//0xE6
+var and_n = function(){
+	value=readByte(pc+1)
+	a&=value;
+	if (a===0){setZeroFlag();}else{resetZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	resetCarryFlag();
+	m=2;
+	t=8;
+}
+
+//0xE7
+var rst_20 = function(){
+	memory.writeWord(pc+1, sp);
+	sp-=2;
+	pc=0x0020
+	m=1;
+	t=16;
+}
+
+//0xE8
+var add_sp_d = function(){
+	value = readByte(pc+1);
+	sp+=value;
+	resetZeroFlag();
+	resetSubFlag();
+	if(((sp&0x0F) + (value&0x0F))&0x10){setHalfFlag();}else {resetHalfFlag();}
+	if (sp>65535){setCarryFlag();} else {resetCarryFlag();}
+	m=2;
+	t=16;
+}
+
+//0xE9
+var jp_hl = function(){
+	pc=memory.readByte(getAddr(h,l));
+	m=1;
+	t=4;
+}
+
+//0xEA
+var ld_nn_a = function();
+	writeByte(a, readWord(pc+1));
+	m=3;
+	t=16;
+}
+
+//0xEE
+var xor_n = function(){
+	var value=readByte(pc+1);
+	a^=value;
+	if (a===0){setZeroFlag();}else{resetZeroFlag();}
+	resetSubFlag();
+	resetHalfFlag();
+	resetCarryFlag();
+	m=2;
+	t=8;
+}
+
+//0xEF
+var rst_28 =  function(){
+	memory.writeWord(pc+1, sp);
+	sp-=2;
+	pc=0x0028
+	m=1;
+	t=16;
+}
+
+//0xF0
+
 
 
 //------------------//
