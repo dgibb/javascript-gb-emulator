@@ -23,7 +23,7 @@ var t;
 //interupts
 var i;
 
-//instruction array
+//instruction arrays
 var oneByteInstructions = [nop(), //0x00
 	ld_bc,
 	ld_bc_a,
@@ -129,7 +129,7 @@ var oneByteInstructions = [nop(), //0x00
 	ld_h_l,
 	ld_h_hl,
 	ld_h_a,
-	ld_l_b,
+	ld_l_b,b<<8 + c
 	ld_l_c,
 	ld_l_d,
 	ld_l_e,
@@ -281,6 +281,9 @@ var oneByteInstructions = [nop(), //0x00
 	unused,
 	cp_n,
 	rst_38,]
+	
+var twoByteInstructions = [
+]
 
 //instructions
 
@@ -288,7 +291,7 @@ var oneByteInstructions = [nop(), //0x00
 var nop = function(){
 m=1
 t=4
-};
+}
 
 //0x01
 var ld_bc_nn = function(){
@@ -297,7 +300,7 @@ var ld_bc_nn = function(){
 	pc+=2;
 	m=3;
 	t=12;
-};
+}
 
 //0x02
 var ld_bc_a = function(){
@@ -307,64 +310,147 @@ var ld_bc_a = function(){
 	memory.writeByte(addr, a);
 	m=1;
 	t=8;
-};
+}
 
 //0x03
 var inc_bc = function(){
 	c++;
-	if(c>255){
-		c=0
+	c&=0xFF;
+	if(c===0){
 		b++;
+		b&=0xFF;
 	}
 	m=1;
-	t=4;
-};
+	t=8;
+}
 
 //0x04
 var inc_b = function(){
 	b++;
-	if (b===0){setZeroFlag();}else{resetZeroFlag();}
-	if(b===0x10){setHalfFlag();}else {resetHalfFlag();}
+	b&=0xFF;
+	if (b===0){b=0; setZeroFlag();} else {resetZeroFlag();}
+	if(b===0x10){setHalfFlag();} else {resetHalfFlag();}
 	resetSubFlag();	
 	m=1;
 	t=4;
-};
+}
 
 //0x05
 var dec_b = function(){
 	b--;
-	if (b===0){setZeroFlag();}else{resetZeroFlag();}
-	if(b===0x0F){setHalfFlag();}else {resetHalfFlag();}
+	b&=0xFF;
+	if (b===0){setZeroFlag();} else {resetZeroFlag();}
+	if(b===0x0F){setHalfFlag();} else {resetHalfFlag();}
 	setSubFlag();	
 	m=1;
 	t=4;
-};
+}
 
 //0x06
 var ld_b_n = function(){
 	b=memory.readByte(pc+1);
-	pc++;
 	m=2;
 	t=8;
-};
+}
 
 //0x07
 var rlca = function(){
-	var carrybit= a>>7;
-	if (carrybit===1){setCarryFlag();}else {resetCarryFlag();}
+	var carrybit= (a>>7)&0x01;
+	if (carrybit===1){setCarryFlag();} else {resetCarryFlag();}
 	a<<1;
 	a+=carrybit;
 	resetZeroFlag();
 	resetHalfFlag();
 	resetSubFlag();
-};
-		
+}
+
+
+//0x08
+var ld_nn_sp = function(){
+	memory.writeByte(sp, memory.readWord(pc+1));
+	m=3;
+	t=20;
+}
+
+//0x09
+var add_hl_bc = function(){
+	var x = b<<8 + c;
+	var y= h<<8 +l;
+	var z=x+y;
+	l= z&0x00FF;
+	h=z&0xFF00>>8;
+	if ((x&0x0F00 + y&0x0F00)&0x1000){setHalfFlag();} else {resetHalfFlag();}
+	if (z>65535){setCarryFlag();} else {resetCarryFlag();}
+	resetSubFlag();
+	m=1;
+	t=8
+}
+
+//0x0A
+var ld_a_bc = function(){
+	a=memory.readByte(getAddr(b,c));
+	m=1;
+	t=8;
+}
+
+//0x0B
+var dec_bc = function(){
+	var x= getAddr(b,c);
+	x--;
+	b=x&0xFF00;
+	b>>8;
+	c=x&0x00FF;
+	m=1;
+	t=8;
+}
+
+//0x0C
+var inc_c = function(){
+	c++;
+	c&=0xFF;
+	if (c===0){setZeroFlag();} else {resetZeroFlag();}
+	if (c===0x10){setHalfFlag();} else {resetHalfFlag();}
+	resetSubFlag();
+	m=1;
+	t=4;
+}
+
+//0x0D
+var dec_c = function(){
+	c--;
+	c&=0xFF;
+	if (c===0){setZeroFlag();} else {resetZeroFlag();}
+	if (c===0x0F){setHalfFlag();} else {resetHalfFlag();}
+	setSubFlag();
+	m=1;
+	t=4;
+}
+
+//0x0E
+var ld_c_n = function(){
+	c=memory.readByte(pc+1);
+	m=2;
+	t=8;
+}
+
+//0x0F
+var rrca = function(){
+	var varrybit = (a<<7)&0x80;
+	if (carrybit){setCarryFlag();} else {resetCarryFlag();}
+	a>>1;
+	a+=carrybit
+	if(a===0){setZeroFlag();} else {resetZeroFlag();}
+	resetSubFlag();
+	resetHalfFlag();
+	m=1;
+	t=4
+}		
 
 //0x10
 var stop = function(){
 	m=2;
 	t=4;
-};
+}
 
 //0x11
 var ld_de_nn = function(){
@@ -386,16 +472,19 @@ var ld_de_a = function(){
 //0x13
 var inc_de = function(){
 	e++;
+	e&=0xFF;
 	if(e===0){
 		d++;
+		d&=0xFF;
 	}
 	m=1;
 	t=8;
 }
 
 //0x14
-varinc_d{
+var inc_d = function{
 	d++;
+	d&=0xFF;
 	if (d===0){setZeroFlag();}else{resetZeroFlag();}
 	if(d===0x10){setHalfFlag();}else {resetHalfFlag();}
 	resetSubFlag();
@@ -404,8 +493,9 @@ varinc_d{
 }
 
 //0x15
-vardec_d{
+var dec_d =function(){
 	d--;
+	d&=0xFF;
 	if (d===0){setZeroFlag();}else{resetZeroFlag();}
 	if(d===0x0F){setHalfFlag();}else {resetHalfFlag();}
 	setSubFlag();	
@@ -416,37 +506,119 @@ vardec_d{
 //0x16
 var ld_d_n = function(){
 	h=memory.readByte(pc+1);
-	pc++;
 	m=2;
 	t=8;
 }
 
 //0x17
 var rla = function(){
-	var carrybit;
-	if (f&0x80====0x80){carrybit=1;}else{carrybit=0;}
-	if (carrybit====1){setCarryFlag();}else {resetCarryFlag();}
+	var carry = carryFlag()?1:0;
+	if (a&0x80===0x80){setCarryFlag();} else {resetCarryFlag();}
 	a<<1;
-	a+=carrybit;
+	a+=carry;
+	a&=0xFF;
 	resetZeroFlag();
 	resetHalfFlag();
 	resetSubFlag();
-	}
-
+	m=1;
+	t=4
 }
+
+//0x18
+var jr_n = function(){
+	var jump=readByte(pc+1);
+	pc+=jump;
+	t=12;
+}
+
+//0x19
+var add_hl_bc = function(){
+	var x = d<<8 + e;
+	var y= h<<8 +l;
+	var z=x+y;
+	l= z&0x00FF;
+	h=z&0xFF00>>8;
+	if ((x&0x0F00 + y&0x0F00)&0x1000){setHalfFlag();} else {resetHalfFlag();}
+	if (z>65535){setCarryFlag();} else {resetCarryFlag();}
+	resetSubFlag();
+	m=1;
+	t=8
+}
+
+//0x1A
+var ld_a_de = function(){
+	a=memory.readByte(getAddr(d,e));
+	m=1;
+	t=8;
+}
+
+//0x1B
+var dec_de = function(){
+	var x= getAddr(d,e);
+	x--;
+	d=x&0xFF00;
+	d>>8;
+	e=x&0x00FF;
+	m=1;
+	t=8;
+}
+
+//0x1C
+var inc_e = function{
+	e++;
+	e&=0xFF;
+	if (e===0){setZeroFlag();}else{resetZeroFlag();}
+	if(e===0x10){setHalfFlag();}else {resetHalfFlag();}
+	resetSubFlag();
+	m=1;
+	t=4;	
+}
+
+//0x1D
+var dec_e = function(){
+	e--;
+	e&=0xFF;
+	if (e===0){setZeroFlag();} else {resetZeroFlag();}
+	if (e===0x0F){setHalfFlag();} else {resetHalfFlag();}
+	setSubFlag();
+	m=1;
+	t=4;
+}
+
+//0x1E
+var ld_e_n = function(){
+	e=memory.readByte(pc+1);
+	m=2;
+	t=8;
+}
+
+//0x1F
+var rra = function(){
+	var carry = carryFlag()?0x80:0;
+	if (a&0x10){setCarryFlag();} else {resetCarryFlag();}
+	a>>1;
+	a+=carry;
+	a&=0xFF;
+	resetZeroFlag();
+	resetHalfFlag();
+	resetSubFlag();
+	m=1;
+	t=4
+}
+
 
 //0x20
 var jr_nz_n = function() {
 	if (!zeroFlag()){
 		pc+=memory.readByte(pc+1);
-		pc++;
 		t=12;
+		m=0
 		}
 	else{
 		pc++;
 		t=8;
+		m=2;
 		}
-	m=2;
 }
 
 //0x21
@@ -474,8 +646,10 @@ var ldi_hl_a = function() {
 //0x23
 var inc_hl = function() 
 	l++;
+	l&=0xFF
 	if(l===0){
 		h++;
+		h&=0xFF
 	}
 	m=1;
 	t=8;
@@ -509,8 +683,105 @@ var ld_h_n = function(){
 	t=8;
 }
 
+//0x27
+var daa = function(){
+	if (a&0x0F>9||halfFlag()){a+=6;}
+	if ((a>>4&0x0F)>9||carryFlag()){a+=96; setCarryFlag();}
+	if (a===0){setZeroFlag();}
+	resetHalfFlag();
+}
+
+//0x28
+var jr_z_n = function(){
+	if (zeroFlag()){
+		pc+=memory.readByte(pc+1);
+		t=12;
+		m=0
+		}
+	else{
+		pc++;
+		t=8;
+		m=2;
+		}
+}
+
+//0x29
+var add_hl_hl = function(){
+	var x = h<<8 + l;
+	var z=x+x;
+	l= z&0x00FF;
+	h=z&0xFF00>>8;
+	if ((x&0x0F00 + x&0x0F00)&0x1000){setHalfFlag();} else {resetHalfFlag();}
+	if (z>65535){setCarryFlag();} else {resetCarryFlag();}
+	resetSubFlag();
+	m=1;
+	t=8
+}
+
+//0x2A
+var ldi_hl = function(){
+	a=readByte(getAddr(h,l));
+	l++;
+	l&=0xFF;
+	if (l===0){
+		h++;
+		h&=0xFF;
+		}
+	m=1;
+	t=8;
+}
+
+//0x2B
+var dec_bc = function(){
+	var x= getAddr(h,l);
+	x--;
+	h=x&0xFF00;
+	h>>8;
+	l=x&0x00FF;
+	m=1;
+	t=8;
+}
+
+//0x2C
+var inc_l = function{
+	l++;
+	l&=0xFF;
+	if (l===0){setZeroFlag();}else{resetZeroFlag();}
+	if(l===0x10){setHalfFlag();}else {resetHalfFlag();}
+	resetSubFlag();
+	m=1;
+	t=4;	
+}
+
+//0x2D
+var dec_l = function(){
+	l--;
+	if (l===0){setZeroFlag();}else{resetZeroFlag();}
+	if(l===0x0F){setHalfFlag();}else {resetHalfFlag();}
+	setSubFlag();	
+	m=1;
+	t=4;
+}
+
+//0x2E
+var ld_l_n = function(){
+	l=memory.readByte(pc+1);
+	m=2;
+	t=8;
+}
+
+//0x2F
+var cpl = function(){
+	a=~a;
+	a&=0xFF;
+	m=1;
+	t=4;
+	setHalfFlag();
+	setSubFlag();
+}
+
 //0x30
-var jr_nc_im = function(){
+var jr_nc_n = function(){
 	if (f&0x10!=0x10){
 		pc+=readByte(pc+1);
 		pc++;
@@ -523,8 +794,6 @@ var jr_nc_im = function(){
 	}
 		m=2;
 }
-
-
 
 //0x31
 var ld_sp_nn = function(){
@@ -585,6 +854,545 @@ var ld_hl_n = function(){
 	pc++;
 	m=2;
 	t=12;
+}
+
+//0x37
+var scf = function(){
+	setCarryFlag();
+	resetSubFlag();
+	resetHalfFlag();
+	m=1;
+	t=4;
+}
+
+//0x38
+var jr_c_n = function()
+	if (carryFlag()){
+		pc+=memory.readByte(pc+1);
+		t=12;
+		m=0
+		}
+	else{
+		pc++;
+		t=8;
+		m=2;
+		}
+}
+
+//0x39
+var add_hl_sp = function(){
+	var x = h<<8 + l;
+	var y= sp;
+	var z=x+y;
+	l= z&0x00FF;
+	h=z&0xFF00>>8;
+	if ((x&0x0F00 + y&0x0F00)&0x1000){setHalfFlag();} else {resetHalfFlag();}
+	if (z>65535){setCarryFlag();} else {resetCarryFlag();}
+	resetSubFlag();
+	m=1;
+	t=8
+}
+
+//0x3A
+var ldd_hl = function(){
+	var x =getAddr(h,l);
+	a=readByte(x)
+	x--;
+	h=x&0xFF00;
+	h>>8;
+	l=x&0x00FF;
+	m=1;
+	t=8;
+}
+
+//0x3B
+var dec_sp = function(){
+	sp--;
+	sp&=0xFFFF;
+	m=1;
+	t=8;
+}
+
+//0x3C
+var inc_a = function(){
+	a++;
+	a&=0xFF;
+	if (a===0){setZeroFlag();}else{resetZeroFlag();}
+	if(a===0x10){setHalfFlag();}else {resetHalfFlag();}
+	resetSubFlag();
+	m=1;
+	t=4;	
+}
+
+//0x3D
+var dec_a = function(){
+	a--;
+	if (a===0){setZeroFlag();}else{resetZeroFlag();}
+	if(a===0x0F){setHalfFlag();}else {resetHalfFlag();}
+	setSubFlag();	
+	m=1;
+	t=4;
+}
+
+//0x3E
+var ld_a_n = function(){
+	a=memory.readByte(pc+1);
+	m=2;
+	t=8;
+}
+
+//0x3F
+var ccf = function(){
+	if (carryFlag()){resetCarryFlag();} else {setCarryFlag();}
+	m=1;
+	t=4;
+}
+
+
+//0x40
+var ld_b_b= function(){
+	b=b;
+	m=1;
+	t=4;
+}
+
+//0x41
+var ld_b_c= function(){
+	b=c;
+	m=1;
+	t=4;
+}
+
+//0x42
+var ld_b_d= function(){
+	b=d;
+	m=1;
+	t=4;
+}
+
+//0x43
+var ld_b_e= function(){
+	b=e;
+	m=1;
+	t=4;
+}
+
+//0x44
+var ld_b_h= function(){
+	b=h;
+	m=1;
+	t=4;
+}
+
+//0x45
+var ld_b_l= function(){
+	b=l;
+	m=1;
+	t=4;
+}
+
+//0x46
+var ld_b_hl= function(){
+	b=memory.readByte(getAddr(h,l);
+	m=1;
+	t=4;
+}
+
+//0x47
+var ld_b_a= function(){
+	b=a;
+	m=1;
+	t=4;
+}
+
+//0x48
+var ld_c_b= function(){
+	c=b;
+	m=1;
+	t=4;
+}
+
+//0x49
+var ld_c_c= function(){
+	c=c;
+	m=1;
+	t=4;
+}
+
+//0x4A
+var ld_c_d= function(){
+	c=d;
+	m=1;
+	t=4;
+}
+
+//0x4B
+var ld_c_e= function(){
+	c=e;
+	m=1;
+	t=4;
+}
+
+//0x4C
+var ld_c_h= function(){
+	c=h;
+	m=1;
+	t=4;
+}
+
+//0x4D
+var ld_c_l= function(){
+	c=l;
+	m=1;
+	t=4;
+}
+
+//0x4E
+var ld_c_hl= function(){
+	c=memory.readByte(getAddr(h,l);
+	m=1;
+	t=4;
+}
+
+//0x4F
+var ld_c_a= function(){
+	c=a;
+	m=1;
+	t=4;
+}
+
+//0x50
+var ld_d_b= function(){
+	d=b;
+	m=1;
+	t=4;
+}
+
+//0x51
+var ld_d_c= function(){
+	d=c;
+	m=1;
+	t=4;
+}
+
+//0x52
+var ld_d_d= function(){
+	d=d;
+	m=1;
+	t=4;
+}
+
+//0x53
+var ld_d_e= function(){
+	d=e;
+	m=1;
+	t=4;
+}
+
+//0x54
+var ld_d_h= function(){
+	d=h;
+	m=1;
+	t=4;
+}
+
+//0x55
+var ld_d_l= function(){
+	d=l;
+	m=1;
+	t=4;
+}
+
+//0x56
+var ld_d_hl= function(){
+	d=memory.readByte(getAddr(h,l);
+	m=1;
+	t=4;
+}
+
+//0x57
+var ld_d_a= function(){
+	d=a;
+	m=1;
+	t=4;
+}
+
+//0x58
+var ld_e_b= function(){
+	e=b;
+	m=1;
+	t=4;
+}
+
+//0x59
+var ld_e_c= function(){
+	e=c;
+	m=1;
+	t=4;
+}
+
+//0x5A
+var ld_e_d= function(){
+	e=d;
+	m=1;
+	t=4;
+}
+
+//0x5B
+var ld_e_e= function(){
+	e=e;
+	m=1;
+	t=4;
+}
+
+//0x5C
+var ld_e_h= function(){
+	e=h
+	m=1;
+	t=4;
+}
+
+//0x5D
+var ld_e_l= function(){
+	e=l;
+	m=1;
+	t=4;
+}
+
+//0x5E
+var ld_e_hl= function(){
+	e=memory.readByte(getAddr(h,l);
+	m=1;
+	t=4;
+}
+
+//0x5F
+var ld_e_a= function(){
+	e=a;
+	m=1;
+	t=4;
+}
+
+//0x60
+var ld_h_b= function(){
+	h=b;
+	m=1;
+	t=4;
+}
+
+//0x61
+var ld_h_c= function(){
+	h=c;
+	m=1;
+	t=4;
+}
+
+//0x62
+var ld_h_d= function(){
+	h=d;
+	m=1;
+	t=4;
+}
+
+//0x63
+var ld_h_e= function(){
+	h=e;
+	m=1;
+	t=4;
+}
+
+//0x64
+var ld_h_h= function(){
+	h=h;
+	m=1;
+	t=4;
+}
+
+//0x65
+var ld_h_l= function(){
+	h=l;
+	m=1;
+	t=4;
+}
+
+//0x66
+var ld_h_hl= function(){
+	h=memory.readByte(getAddr(h,l);
+	m=1;
+	t=4;
+}
+
+//0x67
+var ld_h_a= function(){
+	h=a;
+	m=1;
+	t=4;
+}
+
+//0x68
+var ld_l_b= function(){
+	l=b;
+	m=1;
+	t=4;
+}
+
+//0x69
+var ld_l_c= function(){
+	l=c;
+	m=1;
+	t=4;
+}
+
+//0x6A
+var ld_l_d= function(){
+	l=d;
+	m=1;
+	t=4;
+}
+
+//0x6B
+var ld_l_e= function(){
+	l=e;
+	m=1;
+	t=4;
+}
+
+//0x6C
+var ld_l_h= function(){
+	l=h;
+	m=1;
+	t=4;
+}
+
+//0x6D
+var ld_l_l= function(){
+	l=l;
+	m=1;
+	t=4;
+}
+
+//0x6E
+var ld_l_hl= function(){
+	l=memory.readByte(getAddr(h,l);
+	m=1;
+	t=4;
+}
+
+//0x6F
+var ld_l_a= function(){
+	l=a;
+	m=1;
+	t=4;
+}
+
+//0x70
+var ld_hl_b= function(){
+	memory.writeByte(getAddr(h,l),b);
+	m=1;
+	t=4;
+}
+
+//0x71
+var ld_hl_c= function(){
+	memory.writeByte(getAddr(h,l),c);
+	m=1;
+	t=4;
+}
+
+//0x72
+var ld_hl_d= function(){
+	memory.writeByte(getAddr(h,l),d);
+	m=1;
+	t=4;
+}
+
+//0x73
+var ld_hl_e= function(){
+	memory.writeByte(getAddr(h,l),e);
+	m=1;
+	t=4;
+}
+
+//0x74
+var ld_hl_h= function(){
+	memory.writeByte(getAddr(h,l),h);
+	m=1;
+	t=4;
+}
+
+//0x45
+var ld_hl_l= function(){
+	memory.writeByte(getAddr(h,l),b);
+	m=1;
+	t=4;
+}
+
+//0x76
+var halt= function(){
+	//
+}
+
+//0x77
+var ld_hl_a= function(){
+	memory.writeByte(getAddr(hl),a);
+	m=1;
+	t=4;
+}
+
+//0x78
+var ld_a_b= function(){
+	a=b;
+	m=1;
+	t=4;
+}
+
+//0x79
+var ld_a_c= function(){
+	a=c;
+	m=1;
+	t=4;
+}
+
+//0x7A
+var ld_a_d= function(){
+	a=d;
+	m=1;
+	t=4;
+}
+
+//0x7B
+var ld_a_e= function(){
+	a=e;
+	m=1;
+	t=4;
+}
+
+//0x7C
+var ld_a_h= function(){
+	a=h;
+	m=1;
+	t=4;
+}
+
+//0x7D
+var ld_a_l= function(){
+	a=l;
+	m=1;
+	t=4;
+}
+
+//7E
+var ld_a_hl= function(){
+	a=memory.readByte(getAddr(h,l);
+	m=1;
+	t=4;
+}
+
+//0x7F
+var ld_a_a= function(){
+	a=a;
+	m=1;
+	t=4;
 }
 
 //0x80
@@ -1274,7 +2082,7 @@ var cp_c = function(){
 }
 
 //0xBA
-var cp_e = function(){
+var cp_d = function(){
 	var result= a-d;
 	if (result < 0){setCarryFlag();}
 	if(a&0x0F < d&0x0F){setHalfFlag();}else {resetHalfFlag();}
@@ -1776,6 +2584,122 @@ var rst_28 =  function(){
 }
 
 //0xF0
+var ldh_a_n = function(){
+	var addr=0xFF00+memory.readByte(pc+1);
+	a=memory.readByte(addr);
+	m=2;
+	t=12;
+	}
+
+//0xF1
+var pop_af = function(){
+	f=memory.readByte(sp+1);
+	a=memory.readByte(sp+2);
+	sp+=2;
+	m=1;
+	t=12;	
+}
+	
+//0xF2
+var ld_a_c = function(){
+	var addr=0xFF00+c;
+	a=memory.readByte(addr);
+	m=1;
+	t=8;
+}
+
+//0xF3
+var di = function(){
+	i=false;
+	m=1;
+	t=4;
+}
+
+//0xF5
+var push_af = function(){
+	memory.writeByte(a, sp);
+	memory.writeByte(f,sp-1);
+	sp-=2;
+	m=1;
+	t=16;
+}
+
+//0xF7
+var or_n = function(){
+	a|=memory.readByte(pc+1);
+	if (a===0){setZeroFlag();}else{resetZeroFlag();}
+	resetSubFlag();
+	resetHalfFlag();
+	resetCarryFlag();
+	m=1;
+	t=4;
+}
+
+//0xF8
+var rst_30 = function(){
+	memory.writeWord(pc+1, sp);
+	sp-=2;
+	pc=0x0030
+	m=1;
+	t=16;
+}
+
+//0xF9
+var ldhl_sp_d = function(){
+	var value = sp+memory.readByte(pc+1);
+	h=(value>>8)&0x00FF;
+	l=value&0x00FF;
+	if (value>65535){setCarryFlag();} else {resetCarryFlag();}
+	if(((sp&0x0F00) + (value&0x0F00))&0x1000){setHalfFlag();}else {resetHalfFlag();}
+	m=2;
+	t=12;
+	resetZeroFlag();
+	resetSubFlag();
+}
+
+//0xFA
+var ld_sp_hl = function(){
+	sp=h<<8;
+	sp+=l;
+	m=1;
+	t=8;
+}
+	
+//0xFB
+var ld_a_nn = function(){
+	a=readWord(pc+1);
+	m=3;
+	t=16;
+}
+
+//0xFC
+var ei= function(){
+	i=true;
+	m=1;
+	t=4;
+}
+
+//0xFE
+var cp_n = function 
+	var value=memory.readByte(pc+1);
+	var result= a-value;
+	if (result < 0){setCarryFlag();}
+	if(a&0x0F < value&0x0F){setHalfFlag();}else {resetHalfFlag();}
+	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
+	setSubFlag();
+	m=2;
+	t=8;
+}
+
+//0xFF
+var rst_38 =  function(){
+	memory.writeWord(pc+1, sp);
+	sp-=2;
+	pc=0x0038
+	m=1;
+	t=16;
+}
+
 
 
 
