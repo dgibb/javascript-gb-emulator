@@ -349,8 +349,7 @@ var dec_b = function(){
 //0x06
 var ld_b_n = function(){
 	b=memory.readByte(pc+1);
-	m=2;
-	t=8;
+	m=2; t=8;
 }
 
 //0x07
@@ -389,8 +388,7 @@ var add_hl_bc = function(){
 //0x0A
 var ld_a_bc = function(){
 	a=memory.readByte(getAddr(b,c));
-	m=1;
-	t=8;
+	m=1; t=8;
 }
 
 //0x0B
@@ -400,8 +398,7 @@ var dec_bc = function(){
 	b=x&0xFF00;
 	b>>8;
 	c=x&0x00FF;
-	m=1;
-	t=8;
+	m=1; t=8;
 }
 
 //0x0C
@@ -411,8 +408,7 @@ var inc_c = function(){
 	if (c===0){setZeroFlag();} else {resetZeroFlag();}
 	if (c===0x10){setHalfFlag();} else {resetHalfFlag();}
 	resetSubFlag();
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x0D
@@ -422,15 +418,13 @@ var dec_c = function(){
 	if (c===0){setZeroFlag();} else {resetZeroFlag();}
 	if (c===0x0F){setHalfFlag();} else {resetHalfFlag();}
 	setSubFlag();
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x0E
 var ld_c_n = function(){
 	c=memory.readByte(pc+1);
-	m=2;
-	t=8;
+	m=2; t=8;
 }
 
 //0x0F
@@ -448,25 +442,21 @@ var rrca = function(){
 
 //0x10
 var stop = function(){
-	m=2;
-	t=4;
+	m=1; t=4;
 }
 
 //0x11
 var ld_de_nn = function(){
 	d=memory.readByte(pc);
 	e=memory.readByte(pc+1);
-	pc+=2;
-	m=3;
-	t=12;
+	m=3; t=12;
 };
 
 //0x12
 var ld_de_a = function(){
 	var addr = getAddr(d,e);
 	memory.writeByte(addr, a);
-	m=1;
-	t=8;
+	m=1; t=8;
 };
 
 //0x13
@@ -477,8 +467,7 @@ var inc_de = function(){
 		d++;
 		d&=0xFF;
 	}
-	m=1;
-	t=8;
+	m=1; t=8;
 }
 
 //0x14
@@ -488,8 +477,7 @@ var inc_d = function{
 	if (d===0){setZeroFlag();}else{resetZeroFlag();}
 	if(d===0x10){setHalfFlag();}else {resetHalfFlag();}
 	resetSubFlag();
-	m=1;
-	t=4;	
+	m=1; t=4;	
 }
 
 //0x15
@@ -499,15 +487,13 @@ var dec_d =function(){
 	if (d===0){setZeroFlag();}else{resetZeroFlag();}
 	if(d===0x0F){setHalfFlag();}else {resetHalfFlag();}
 	setSubFlag();	
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x16
 var ld_d_n = function(){
 	h=memory.readByte(pc+1);
-	m=2;
-	t=8;
+	m=2; t=8;
 }
 
 //0x17
@@ -520,14 +506,14 @@ var rla = function(){
 	resetZeroFlag();
 	resetHalfFlag();
 	resetSubFlag();
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x18
 var jr_n = function(){
 	var jump=readByte(pc+1);
 	pc+=jump;
+	m=0;
 	t=12;
 }
 
@@ -541,15 +527,13 @@ var add_hl_bc = function(){
 	if ((x&0x0F00 + y&0x0F00)&0x1000){setHalfFlag();} else {resetHalfFlag();}
 	if (z>65535){setCarryFlag();} else {resetCarryFlag();}
 	resetSubFlag();
-	m=1;
-	t=8
+	m=1; t=8;
 }
 
 //0x1A
 var ld_a_de = function(){
 	a=memory.readByte(getAddr(d,e));
-	m=1;
-	t=8;
+	m=1; t=8;
 }
 
 //0x1B
@@ -559,8 +543,7 @@ var dec_de = function(){
 	d=x&0xFF00;
 	d>>8;
 	e=x&0x00FF;
-	m=1;
-	t=8;
+	m=1; t=8;
 }
 
 //0x1C
@@ -570,8 +553,7 @@ var inc_e = function{
 	if (e===0){setZeroFlag();}else{resetZeroFlag();}
 	if(e===0x10){setHalfFlag();}else {resetHalfFlag();}
 	resetSubFlag();
-	m=1;
-	t=4;	
+	m=1; t=4;	
 }
 
 //0x1D
@@ -581,15 +563,13 @@ var dec_e = function(){
 	if (e===0){setZeroFlag();} else {resetZeroFlag();}
 	if (e===0x0F){setHalfFlag();} else {resetHalfFlag();}
 	setSubFlag();
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x1E
 var ld_e_n = function(){
 	e=memory.readByte(pc+1);
-	m=2;
-	t=8;
+	m=2; t=8;
 }
 
 //0x1F
@@ -602,8 +582,7 @@ var rra = function(){
 	resetZeroFlag();
 	resetHalfFlag();
 	resetSubFlag();
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 
@@ -611,13 +590,10 @@ var rra = function(){
 var jr_nz_n = function() {
 	if (!zeroFlag()){
 		pc+=memory.readByte(pc+1);
-		t=12;
-		m=0
+		t=12; m=0;
 		}
 	else{
-		pc++;
-		t=8;
-		m=2;
+		m=2; t=8;
 		}
 }
 
@@ -625,9 +601,7 @@ var jr_nz_n = function() {
 var ld_hl_nn = function() {
 	h=memory.readByte(pc+1);
 	l=memory.readByte(pc+2);
-	pc+=2;
-	m=1;
-	t=8;
+	m=1; t=8;
 };
 
 //0x22
@@ -636,11 +610,11 @@ var ldi_hl_a = function() {
 	memory.writeByte(addr, a);
 	l++;
 	if(l>255){
-		l&=0xFF00;
+		l&=0x00FF;
 		h++;
+		h&=0xFF;
 	}
-	m=1;
-	t=8;
+	m=1; t=8;
 }
 
 //0x23
@@ -651,8 +625,7 @@ var inc_hl = function()
 		h++;
 		h&=0xFF
 	}
-	m=1;
-	t=8;
+	m=1; t=8;
 }
 
 //0x24
@@ -661,8 +634,7 @@ var inc_h = function(){
 	if (h===0){setZeroFlag();}else{resetZeroFlag();}
 	if(h===0x10){setHalfFlag();}else {resetHalfFlag();}
 	resetSubFlag();	
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x25
@@ -679,8 +651,7 @@ var dec_h = function(){
 var ld_h_n = function(){
 	h=memory.readByte(pc+1);
 	pc++;
-	m=2;
-	t=8;
+	m=2; t=8;
 }
 
 //0x27
@@ -689,19 +660,17 @@ var daa = function(){
 	if ((a>>4&0x0F)>9||carryFlag()){a+=96; setCarryFlag();}
 	if (a===0){setZeroFlag();}
 	resetHalfFlag();
+	m=1; t=4
 }
 
 //0x28
 var jr_z_n = function(){
 	if (zeroFlag()){
 		pc+=memory.readByte(pc+1);
-		t=12;
-		m=0
+		t=12; m=0;
 		}
 	else{
-		pc++;
-		t=8;
-		m=2;
+		m=2; t=8;
 		}
 }
 
@@ -714,8 +683,7 @@ var add_hl_hl = function(){
 	if ((x&0x0F00 + x&0x0F00)&0x1000){setHalfFlag();} else {resetHalfFlag();}
 	if (z>65535){setCarryFlag();} else {resetCarryFlag();}
 	resetSubFlag();
-	m=1;
-	t=8
+	m=1; t=8;
 }
 
 //0x2A
@@ -727,8 +695,7 @@ var ldi_hl = function(){
 		h++;
 		h&=0xFF;
 		}
-	m=1;
-	t=8;
+	m=1; t=8;
 }
 
 //0x2B
@@ -738,8 +705,7 @@ var dec_bc = function(){
 	h=x&0xFF00;
 	h>>8;
 	l=x&0x00FF;
-	m=1;
-	t=8;
+	m=1; t=8;
 }
 
 //0x2C
@@ -749,8 +715,7 @@ var inc_l = function{
 	if (l===0){setZeroFlag();}else{resetZeroFlag();}
 	if(l===0x10){setHalfFlag();}else {resetHalfFlag();}
 	resetSubFlag();
-	m=1;
-	t=4;	
+	m=1; t=4;	
 }
 
 //0x2D
@@ -759,40 +724,33 @@ var dec_l = function(){
 	if (l===0){setZeroFlag();}else{resetZeroFlag();}
 	if(l===0x0F){setHalfFlag();}else {resetHalfFlag();}
 	setSubFlag();	
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x2E
 var ld_l_n = function(){
 	l=memory.readByte(pc+1);
-	m=2;
-	t=8;
+	m=2; t=8;
 }
 
 //0x2F
 var cpl = function(){
 	a=~a;
 	a&=0xFF;
-	m=1;
-	t=4;
 	setHalfFlag();
 	setSubFlag();
+	m=1; t=4;
 }
 
 //0x30
 var jr_nc_n = function(){
-	if (f&0x10!=0x10){
+	if (!carryFlag();){
 		pc+=readByte(pc+1);
-		pc++;
-		m=2;
-		t=12;
+		t=12; m=0;
 		}
 	else{
-		pc++;
-		t=8;
+		m=2; t=8;
 	}
-		m=2;
 }
 
 //0x31
@@ -800,9 +758,7 @@ var ld_sp_nn = function(){
 	sp=memory.readByte(pc);
 	sp<<8;
 	sp+=memory.readByte(pc+1);
-	pc+=2;
-	m=3;
-	t=12;
+	m=3; t=12;
 }
 
 //0x32
@@ -813,15 +769,13 @@ var ldd_hl_a = function(){
 	if(l===255){
 		h--;
 	}
-	m=2;
-	t=8;
+	m=2; t=8;
 }
 
 //0x33
 var inc_sp = function(){
 	sp++;
-	m=1;
-	t=8;
+	m=1; t=8;
 }
 
 //0x34
@@ -832,8 +786,7 @@ var inc_hl = function(){
 	if (data===0){setZeroFlag();}else{resetZeroFlag();}
 	if(data===0x10){setHalfFlag();}else {resetHalfFlag();}
 	resetSubFlag();	
-	m=1;
-	t=12;
+	m=1; t=12;
 }
 
 //0x35
@@ -844,16 +797,13 @@ var dec_hl = function(){
 	if (data===0){setZeroFlag();}else{resetZeroFlag();}
 	if(data===0x0F){setHalfFlag();}else {resetHalfFlag();}
 	setSubFlag();	
-	m=1;
-	t=12;
+	m=1; t=12;
 }
 
 //0x36
 var ld_hl_n = function(){
 	writeByte(getAddr(h,l), memory.readByte(pc+1) );
-	pc++;
-	m=2;
-	t=12;
+	m=2; t=12;
 }
 
 //0x37
@@ -861,22 +811,18 @@ var scf = function(){
 	setCarryFlag();
 	resetSubFlag();
 	resetHalfFlag();
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x38
-var jr_c_n = function()
-	if (carryFlag()){
-		pc+=memory.readByte(pc+1);
-		t=12;
-		m=0
+ar jr_nc_n = function(){
+	if (carryFlag();){
+		pc+=readByte(pc+1);
+		t=12; m=0;
 		}
 	else{
-		pc++;
-		t=8;
-		m=2;
-		}
+		m=2; t=8;
+	}
 }
 
 //0x39
@@ -889,8 +835,7 @@ var add_hl_sp = function(){
 	if ((x&0x0F00 + y&0x0F00)&0x1000){setHalfFlag();} else {resetHalfFlag();}
 	if (z>65535){setCarryFlag();} else {resetCarryFlag();}
 	resetSubFlag();
-	m=1;
-	t=8
+	m=1; t=8;
 }
 
 //0x3A
@@ -901,16 +846,14 @@ var ldd_hl = function(){
 	h=x&0xFF00;
 	h>>8;
 	l=x&0x00FF;
-	m=1;
-	t=8;
+	m=1; t=8;
 }
 
 //0x3B
 var dec_sp = function(){
 	sp--;
 	sp&=0xFFFF;
-	m=1;
-	t=8;
+	m=1; t=8;
 }
 
 //0x3C
@@ -920,8 +863,7 @@ var inc_a = function(){
 	if (a===0){setZeroFlag();}else{resetZeroFlag();}
 	if(a===0x10){setHalfFlag();}else {resetHalfFlag();}
 	resetSubFlag();
-	m=1;
-	t=4;	
+	m=1; t=4;	
 }
 
 //0x3D
@@ -930,400 +872,343 @@ var dec_a = function(){
 	if (a===0){setZeroFlag();}else{resetZeroFlag();}
 	if(a===0x0F){setHalfFlag();}else {resetHalfFlag();}
 	setSubFlag();	
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x3E
 var ld_a_n = function(){
 	a=memory.readByte(pc+1);
-	m=2;
-	t=8;
+	m=2; t=8;
 }
 
 //0x3F
 var ccf = function(){
 	if (carryFlag()){resetCarryFlag();} else {setCarryFlag();}
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x40
 var ld_b_b= function(){
 	b=b;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x41
 var ld_b_c= function(){
 	b=c;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x42
 var ld_b_d= function(){
 	b=d;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x43
 var ld_b_e= function(){
 	b=e;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x44
 var ld_b_h= function(){
 	b=h;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x45
 var ld_b_l= function(){
 	b=l;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x46
 var ld_b_hl= function(){
 	b=memory.readByte(getAddr(h,l);
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x47
 var ld_b_a= function(){
 	b=a;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x48
 var ld_c_b= function(){
 	c=b;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x49
 var ld_c_c= function(){
 	c=c;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x4A
 var ld_c_d= function(){
 	c=d;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x4B
 var ld_c_e= function(){
 	c=e;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x4C
 var ld_c_h= function(){
 	c=h;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x4D
 var ld_c_l= function(){
 	c=l;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x4E
 var ld_c_hl= function(){
 	c=memory.readByte(getAddr(h,l);
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x4F
 var ld_c_a= function(){
 	c=a;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x50
 var ld_d_b= function(){
 	d=b;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x51
 var ld_d_c= function(){
 	d=c;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x52
 var ld_d_d= function(){
 	d=d;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x53
 var ld_d_e= function(){
 	d=e;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x54
 var ld_d_h= function(){
 	d=h;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x55
 var ld_d_l= function(){
 	d=l;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x56
 var ld_d_hl= function(){
 	d=memory.readByte(getAddr(h,l);
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x57
 var ld_d_a= function(){
 	d=a;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x58
 var ld_e_b= function(){
 	e=b;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x59
 var ld_e_c= function(){
 	e=c;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x5A
 var ld_e_d= function(){
 	e=d;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x5B
 var ld_e_e= function(){
 	e=e;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x5C
 var ld_e_h= function(){
 	e=h
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x5D
 var ld_e_l= function(){
 	e=l;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x5E
 var ld_e_hl= function(){
 	e=memory.readByte(getAddr(h,l);
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x5F
 var ld_e_a= function(){
 	e=a;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x60
 var ld_h_b= function(){
 	h=b;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x61
 var ld_h_c= function(){
 	h=c;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x62
 var ld_h_d= function(){
 	h=d;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x63
 var ld_h_e= function(){
 	h=e;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x64
 var ld_h_h= function(){
 	h=h;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x65
 var ld_h_l= function(){
 	h=l;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x66
 var ld_h_hl= function(){
 	h=memory.readByte(getAddr(h,l);
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x67
 var ld_h_a= function(){
 	h=a;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x68
 var ld_l_b= function(){
 	l=b;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x69
 var ld_l_c= function(){
 	l=c;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x6A
 var ld_l_d= function(){
 	l=d;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x6B
 var ld_l_e= function(){
 	l=e;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x6C
 var ld_l_h= function(){
 	l=h;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x6D
 var ld_l_l= function(){
 	l=l;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x6E
 var ld_l_hl= function(){
 	l=memory.readByte(getAddr(h,l);
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x6F
 var ld_l_a= function(){
 	l=a;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x70
 var ld_hl_b= function(){
 	memory.writeByte(getAddr(h,l),b);
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x71
 var ld_hl_c= function(){
 	memory.writeByte(getAddr(h,l),c);
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x72
 var ld_hl_d= function(){
 	memory.writeByte(getAddr(h,l),d);
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x73
 var ld_hl_e= function(){
 	memory.writeByte(getAddr(h,l),e);
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x74
 var ld_hl_h= function(){
 	memory.writeByte(getAddr(h,l),h);
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x45
 var ld_hl_l= function(){
 	memory.writeByte(getAddr(h,l),b);
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x76
@@ -1334,64 +1219,55 @@ var halt= function(){
 //0x77
 var ld_hl_a= function(){
 	memory.writeByte(getAddr(hl),a);
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x78
 var ld_a_b= function(){
 	a=b;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x79
 var ld_a_c= function(){
 	a=c;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x7A
 var ld_a_d= function(){
 	a=d;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x7B
 var ld_a_e= function(){
 	a=e;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x7C
 var ld_a_h= function(){
 	a=h;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x7D
 var ld_a_l= function(){
 	a=l;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //7E
 var ld_a_hl= function(){
 	a=memory.readByte(getAddr(h,l);
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x7F
 var ld_a_a= function(){
 	a=a;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0x80
@@ -1401,9 +1277,9 @@ var add_b_a = function(){
 	if(((a&0x0F) + (b&0x0F))&0x10){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	a=(result&0x00ff);
-	m=1;
-	t=4;
 	resetSubFlag();
+	m=1; t=4;
+	
 }
 
 //0x81
@@ -1413,9 +1289,9 @@ var  add_c_a = function(){
 	if(((a&0x0F) + (c&0x0F))&0x10){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	a=(result&0x00ff);
-	m=1;
-	t=4;
 	resetSubFlag();
+	m=1; t=4;
+	
 }
 
 //0x82
@@ -1425,9 +1301,8 @@ var add_d_a = function(){
 	if(((a&0x0F) + (d&0x0F))&0x10){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	a=(result&0x00ff);
-	m=1;
-	t=4;
 	resetSubFlag();
+	m=1; t=4;
 }
 	
 //0x83
@@ -1437,9 +1312,8 @@ var add_e_a = function(){
 	if(((a&0x0F) + (e&0x0F))&0x10){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	a=(result&0x00ff);
-	m=1;
-	t=4;
 	resetSubFlag();
+	m=1; t=4;
 }
 
 //0x84
@@ -1449,9 +1323,8 @@ var add_h_a = function(){
 	if(((a&0x0F) + (h&0x0F))&0x10){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	a=(result&0x00ff);
-	m=1;
-	t=4;
 	resetSubFlag();
+	m=1; t=4;
 }
 
 //0x85
@@ -1461,9 +1334,9 @@ var add_l_a = function(){
 	if(((a&0x0F) + (l&0x0F))&0x10){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	a=(result&0x00ff);
-	m=1;
-	t=4;
 	resetSubFlag();
+	m=1; t=4;
+	
 }
 
 //0x86
@@ -1474,9 +1347,9 @@ var add_hl_a = function(){
 	if(((a&0x0F) + (value&0x0F))&0x10){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	a=(result&0x00ff);
-	m=1;
-	t=8;
 	resetSubFlag();
+	m=1; t=8;
+	
 }
 
 //0x87
@@ -1486,9 +1359,9 @@ var add_a_a = function(){
 	if(((a&0x0F) + (a&0x0F))&0x10){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	a=(result&0x00ff);
-	m=1;
-	t=4;
 	resetSubFlag();
+	m=1; t=4;
+
 }
 
 //0x88
@@ -1499,9 +1372,8 @@ var adc_b_a = function(){
 	if(((a&0x0F) + (b&0x0F))&0x10){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	a=(result&0x00ff);
-	m=1;
-	t=8;
 	resetSubFlag();
+	m=1; t=8;
 }
 
 //0x89
@@ -1512,9 +1384,8 @@ var adc_c_a = function(){
 	if(((a&0x0F) + (c&0x0F))&0x10){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	a=(result&0x00ff);
-	m=1;
-	t=4;
 	resetSubFlag();
+	m=1; t=4;
 }
 
 //0x8A
@@ -1524,9 +1395,8 @@ var adc_d_a = function(){
 	if(((a&0x0F) + (d&0x0F))&0x10){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	a=(result&0x00ff);
-	m=1;
-	t=4;
 	resetSubFlag();
+	m=1; t=4;
 }
 
 //0x8B
@@ -1537,9 +1407,8 @@ var adc_e_a = function(){
 	if(((a&0x0F) + (e&0x0F))&0x10){setHalfFlag();}else {resetHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	a=(result&0x00ff);
-	m=1;
-	t=4;
 	resetSubFlag();
+	m=1; t=4;
 }
 
 //0x8C
@@ -1550,9 +1419,8 @@ var adc_h_a = function(){
 	if(((a&0x0F) + (h&0x0F))&0x10){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	a=(result&0x00ff);
-	m=1;
-	t=4;
 	resetSubFlag();
+	m=1; t=4;
 }
 
 //0x8D
@@ -1563,9 +1431,8 @@ var adc_l_a = function(){
 	if(((a&0x0F) + (0&0x0F))&0x10){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	a=(result&0x00ff);
-	m=1;
-	t=4;
 	resetSubFlag();
+	m=1; t=4;
 }
 
 //0x8E
@@ -1577,9 +1444,8 @@ var adc_hl_a = function(){
 	if(((a&0x0F) + (value&0x0F))&0x10){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	a=(result&0x00ff);
-	m=1;
-	t=8;
 	resetSubFlag();
+	m=1; t=8;
 }
 
 //0x8F
@@ -1590,9 +1456,8 @@ var adc_a_a = function(){
 	if(((a&0x0F) + (a&0x0F))&0x10){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	a=(result&0x00ff);
-	m=1;
-	t=4;
 	resetSubFlag();
+	m=1; t=4;
 }
 
 //0x90
@@ -1602,9 +1467,8 @@ var sub_b_a = function(){
 	if(a&0x0F < d&0x0F){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	a=(result&0x00ff);
-	m=1;
-	t=4;
 	setSubFlag();
+	m=1; t=4;
 }
 
 //0x91
@@ -1614,9 +1478,8 @@ var sub_c_a = function(){
 	if(a&0x0F < d&0x0F){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	a=(result&0x00ff);
-	m=1;
-	t=4;
 	setSubFlag();
+	m=1; t=4;
 }
 
 //0x92
@@ -1626,9 +1489,8 @@ var sub_d_a = function(){
 	if(a&0x0F < d&0x0F){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	a=(result&0x00ff);
-	m=1;
-	t=4;
 	setSubFlag();
+	m=1; t=4;
 }
 
 //0x93
@@ -1638,9 +1500,8 @@ var sub_e_a = function(){
 	if(a&0x0F < d&0x0F){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	a=(result&0x00ff);
-	m=1;
-	t=4;
 	setSubFlag();
+	m=1; t=4;
 }
 
 //0x94
@@ -1650,9 +1511,8 @@ var sub_h_a = function(){
 	if(a&0x0F < d&0x0F){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	a=(result&0x00ff);
-	m=1;
-	t=4;
 	setSubFlag();
+	m=1; t=4;
 }
 
 //0x95
@@ -1662,9 +1522,8 @@ var sub_l_a = function(){
 	if(a&0x0F < d&0x0F){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	a=(result&0x00ff);
-	m=1;
-	t=4;
 	setSubFlag();
+	m=1; t=4;
 }
 
 //0x96
@@ -1674,9 +1533,8 @@ var sub_hl_a = function(){
 	if(a&0x0F < d&0x0F){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	cpu.a=(result&0x00ff);
-	m=1;
-	t=8;
 	setSubFlag();
+	m=1; t=8;
 }
 
 //0x97
@@ -1686,9 +1544,8 @@ var sub_a_a = function(){
 	if(a&0x0F < d&0x0F){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	a=(result&0x00ff);
-	m=1;
-	t=4;
 	setSubFlag();
+	m=1; t=4;
 }
 
 //0x98
@@ -1699,9 +1556,8 @@ var sbc_b_a = function(){
 	if(a&0x0F < d&0x0F){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	a=(result&0x00ff);
-	m=1;
-	t=4;
 	setSubFlag();
+	m=1; t=4;
 }
 
 //0x99
@@ -1712,9 +1568,8 @@ var sbc_c_a = function(){
 	if(a&0x0F < d&0x0F){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	a=(result&0x00ff);
-	m=1;
-	t=4;
 	setSubFlag();
+	m=1; t=4;
 }
 
 //0x9A
@@ -1725,9 +1580,8 @@ var sbc_d_a = function(){
 	if(a&0x0F < d&0x0F){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	a=(result&0x00ff);
-	m=1;
-	t=4;
 	setSubFlag();
+	m=1; t=4;
 }
 
 //0x9B
@@ -1738,9 +1592,8 @@ var sbc_e_a = function(){
 	if(a&0x0F < d&0x0F){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	a=(result&0x00ff);
-	m=1;
-	t=4;
-	setSubFlag();
+	setSubFlag();	
+	m=1; t=4;
 }
 
 //0x9C
@@ -1751,9 +1604,8 @@ var sbc_h_a = function(){
 	if(a&0x0F < d&0x0F){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	a=(result&0x00ff);
-	m=1;
-	t=4;
 	setSubFlag();
+	m=1; t=4;
 }
 
 //0x9D
@@ -1764,9 +1616,8 @@ var sbc_l_a = function(){
 	if(a&0x0F < d&0x0F){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	a=(result&0x00ff);
-	m=1;
-	t=4;
 	setSubFlag();
+	m=1; t=4;
 }
 
 //0x9E
@@ -1777,9 +1628,8 @@ var sbc_hl_a = function(){
 	if(a&0x0F < d&0x0F){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	a=(result&0x00ff);
-	m=1;
-	t=8;
 	setSubFlag();
+	m=1; t=8;
 }
 
 //0x9F
@@ -1790,9 +1640,8 @@ var sbc_a_a = function(){
 	if(a&0x0F < d&0x0F){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	a=(result&0x00ff);
-	m=1;
-	t=4;
 	setSubFlag();
+	m=1; t=4;
 }
 
 //0xA0
@@ -1802,8 +1651,7 @@ var and_b = function(){
 	resetSubFlag();
 	setHalfFlag();
 	resetCarryFlag();
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0xA1
@@ -1813,8 +1661,7 @@ var and_c = function(){
 	resetSubFlag();
 	setHalfFlag();
 	resetCarryFlag();
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0xA2
@@ -1824,8 +1671,7 @@ var and_d = function(){
 	resetSubFlag();
 	setHalfFlag();
 	resetCarryFlag();
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0xA3
@@ -1835,8 +1681,7 @@ var and_e = function(){
 	resetSubFlag();
 	setHalfFlag();
 	resetCarryFlag();
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0xA4
@@ -1846,8 +1691,7 @@ var and_h = function(){
 	resetSubFlag();
 	setHalfFlag();
 	resetCarryFlag();
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0xA5
@@ -1857,8 +1701,7 @@ var and_l = function(){
 	resetSubFlag();
 	setHalfFlag();
 	resetCarryFlag();
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0xA6
@@ -1868,8 +1711,7 @@ var and_hl = function(){
 	resetSubFlag();
 	setHalfFlag();
 	resetCarryFlag();
-	m=1;
-	t=8;
+	m=1; t=8;
 }
 
 //0xA7
@@ -1879,8 +1721,7 @@ var and_a = function(){
 	resetSubFlag();
 	setHalfFlag();
 	resetCarryFlag();
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0xA8
@@ -1890,8 +1731,7 @@ var xor_b = function(){
 	resetSubFlag();
 	resetHalfFlag();
 	resetCarryFlag();
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0xA9
@@ -1901,8 +1741,7 @@ var xor_c = function(){
 	resetSubFlag();
 	resetHalfFlag();
 	resetCarryFlag();
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0xAA
@@ -1912,8 +1751,7 @@ var xor_d = function(){
 	resetSubFlag();
 	resetHalfFlag();
 	resetCarryFlag();
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0xAB
@@ -1923,8 +1761,7 @@ var xor_e = function(){
 	resetSubFlag();
 	resetHalfFlag();
 	resetCarryFlag()
-	m=1;
-	t=4;;
+	m=1; t=4;;
 }
 
 //0xAC
@@ -1934,8 +1771,7 @@ var xor_h = function(){
 	resetSubFlag();
 	resetHalfFlag();
 	resetCarryFlag();
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0xAD
@@ -1945,8 +1781,7 @@ var xor_l = function(){
 	resetSubFlag();
 	resetHalfFlag();
 	resetCarryFlag();
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0xAE
@@ -1956,8 +1791,7 @@ var xor_hl = function(){
 	resetSubFlag();
 	resetHalfFlag();
 	resetCarryFlag();
-	m=1;
-	t=8;
+	m=1; t=8;
 }
 
 //0xAF
@@ -1967,8 +1801,7 @@ var xor_a = function(){
 	resetSubFlag();
 	resetHalfFlag();
 	resetCarryFlag();
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0xB0
@@ -1978,8 +1811,7 @@ var or_b = function(){
 	resetSubFlag();
 	resetHalfFlag();
 	resetCarryFlag();
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0xB1
@@ -1989,8 +1821,7 @@ var or_c = function(){
 	resetSubFlag();
 	resetHalfFlag();
 	resetCarryFlag();
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0xB2
@@ -2000,8 +1831,7 @@ var or_d = function(){
 	resetSubFlag();
 	resetHalfFlag();
 	resetCarryFlag();
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0xB3
@@ -2011,8 +1841,7 @@ var or_e = function(){
 	resetSubFlag();
 	resetHalfFlag();
 	resetCarryFlag();
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0xB4
@@ -2022,8 +1851,7 @@ var or_h = function(){
 	resetSubFlag();
 	resetHalfFlag();
 	resetCarryFlag();
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0xB5
@@ -2033,8 +1861,7 @@ var or_l = function(){
 	resetSubFlag();
 	resetHalfFlag();
 	resetCarryFlag();
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0xB6
@@ -2044,8 +1871,7 @@ var or_hl = function(){
 	resetSubFlag();
 	resetHalfFlag();
 	resetCarryFlag();
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0xB7
@@ -2055,8 +1881,7 @@ var or_a = function(){
 	resetSubFlag();
 	resetHalfFlag();
 	resetCarryFlag();
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0xB8
@@ -2066,8 +1891,7 @@ var cp_b = function(){
 	if(a&0x0F < b&0x0F){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	setSubFlag();
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 //0xB9
 var cp_c = function(){
@@ -2076,8 +1900,7 @@ var cp_c = function(){
 	if(a&0x0F < c&0x0F){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	setSubFlag();
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0xBA
@@ -2087,8 +1910,7 @@ var cp_d = function(){
 	if(a&0x0F < d&0x0F){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	setSubFlag();
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0xBB
@@ -2098,8 +1920,7 @@ var cp_e = function(){
 	if(a&0x0F < e&0x0F){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	setSubFlag();
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0xBC
@@ -2109,8 +1930,7 @@ var cp_h = function(){
 	if(a&0x0F < h&0x0F){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	setSubFlag();
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0xBD
@@ -2120,8 +1940,7 @@ var cp_l = function(){
 	if(a&0x0F < l&0x0F){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	setSubFlag();
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0xBE
@@ -2132,8 +1951,7 @@ var cp_hl = function(){
 	if(a&0x0F < value&0x0F){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	setSubFlag();
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0xBF
@@ -2143,8 +1961,7 @@ var cp_a = function(){
 	if(a&0x0F < a&0x0F){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	setSubFlag();
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0xC0
@@ -2164,27 +1981,23 @@ var pop_bc = function{
 	c=memory.readByte(sp+1);
 	b=memory.readByte(sp+2);
 	sp+=2;
-	m=1;
-	t=12;
+	m=1; t=12;
 }
 
 //0xC2
 var jp_nz_nn = function(){
 	if(!zeroFlag()){
 	pc=memory.readWord(pc+1);
-	t=16;
-	m=1;
+	t=16; m=1;
 	}else{
-	t=12;
-	m=3;
+	t=12; m=3;
 	}
 }
 
 //0xC3
 var jp_nn = function(){
 	pc=memory.readWord(pc+1);
-	m=3;
-	t=16;
+	m=3; t=16;
 }
 
 //0xC4
@@ -2196,7 +2009,6 @@ var call_nz_nn = function(){
 	t=24;
 	}else{
 	t=12;
-	pc+=2
 }
 
 //0xC5
@@ -2204,8 +2016,7 @@ var push_bc = function(){
 	memory.writeByte(b, sp);
 	memory.writeByte(b,sp-1);
 	sp-=2;
-	m=1;
-	t=16;
+	m=1; t=16;
 }
 
 //0xC6
@@ -2216,32 +2027,31 @@ var add_a_n = function(){
 	if(((a&0x0F) + (value&0x0F))&0x10){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	a=(result&0x00ff);
-	m=1;
-	t=4;
 	resetSubFlag();
+	m=1; t=4;
 }
 
 //0xC7
 var rst_0 = function(){
 	memory.writeWord(pc+1, sp);
 	sp-=2;
-	pc=0x0000
-	m=1;
-	t=16;
+	pc=0x0000;
+	m=1; t=16;
 }
 
 //0xC8
 var ret_z = function(){
-	m=1;
 	if(zeroFlag){
     var addr=memory.readbyte(sp);
 	addr << 8;
 	addr+= readByte(sp+1);
 	sp+=2;
 	pc=addr;
-	t=20
-	}
+	t=20; m=0;
+	} else{
 	t=8;
+	m=1;
+	}
 }
 
 //0xC9
@@ -2251,47 +2061,41 @@ var ret = function(){
 	addr+= readByte(sp+1);
 	sp+=2;
 	pc=addr;
-	m=1;
-	t=16;
+	m=1; t=16;
 }
 
 //0xCA
 var jp_z_nn = function(){
 	if(zeroFlag()){
 	pc=memory.readWord(pc+1);
-	t=16;
-	m=1;
+	t=16; m=1;
 	}else{
-	t=12;
-	m=3;
+	t=12; m=3;
 	}
 }
 
 //0xCB
 var ext_ops = function(){
 	twoByteInstructions[memory.readByte(pc+1)]();
-	m+=1;
-	t+=4;
 }
 
 //0xCC
 var call_z_nn = function(){
-	m=3;
 	if(zeroFlag()){
 	memory.writeWord(pc+3,sp);
 	pc=memory.readWord(pc+1);
 	t=24;
+	m=0;
 	}else{
 	t=12;
-	pc+=2
+	m=3;
 }
 
 //0xCD
 var call_nn = function(){
 	memory.writeWord(pc+3,sp);
 	pc=memory.readWord(pc+1);
-	t=24;
-	m=3;
+	t=24; m=3;
 }
 
 //0xCE
@@ -2303,29 +2107,27 @@ var adc_a_n = function
 	if(((a&0x0F) + (value&0x0F))&0x10){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	a=(result&0x00ff);
-	m=2;
-	t=8;
 	resetSubFlag();
+	m=2; t=8;
 }
 
 //0xCF
 var rst_8 =  function(){
 	memory.writeWord(pc+1, sp);
 	sp-=2;
-	pc=0x0008
-	m=1;
-	t=16;
+	pc=0x0008;
+	m=1; t=16;
 }
 
 //0xD0
 var ret_nc = function(){
-	m=1;
 	if (!carryFlag()){
 	pc=memory.readWord(sp);
-	t=20;
+	m=0; t=20;
 	sp+=2;
 	}else{
 	t=8;
+	m=1;
 	}
 }
 
@@ -2334,19 +2136,16 @@ var pop_de = function{
 	e=memory.readByte(sp+1);
 	d=memory.readByte(sp+2);
 	sp+=2;
-	m=1;
-	t=12;
+	m=1; t=12;
 }
 
 //0xD2
 var jp_nc_nn = function(){
 	if(!carryFlag()){
 	pc=memory.readWord(pc+1);
-	t=16;
-	m=1;
+	t=16; m=1;
 	}else{
-	t=12;
-	m=3;
+	t=12; m=3;
 	}
 }
 
@@ -2358,14 +2157,12 @@ var unused = function(){
 
 //0xD4
 ar call_nc_nn = function(){
-	m=3;
 	if(!carryFlag()){
 	memory.writeWord(pc+3,sp);
 	pc=memory.readWord(pc+1);
-	t=24;
+	t=24; m=0;
 	}else{
-	t=12;
-	pc+=2
+	t=12; m=3;
 }
 
 //0xD5
@@ -2373,8 +2170,7 @@ var push_de = function(){
 	memory.writeByte(d, sp);
 	memory.writeByte(e,sp-1);
 	sp-=2;
-	m=1;
-	t=16;
+	m=1; t=16;
 }
 
 //0xD6
@@ -2385,32 +2181,29 @@ var sub_a_n = function(){
 	if(a&0x0F < value&0x0F){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	a=(result&0x00ff);
-	m=1;
-	t=4;
 	setSubFlag();
-}
+	m=1; t=4;
+	}
 
 //0xD7
 var rst_10 = function(){
 	memory.writeWord(pc+1, sp);
 	sp-=2;
-	pc=0x0010
-	m=1;
-	t=16;
+	pc=0x0010;
+	m=1; t=16;
 }
 
 //0xD8
 var ret_c = function(){
-	m=1;
 	if(carryFlag){
     var addr=memory.readbyte(sp);
 	addr << 8;
 	addr+= readByte(sp+1);
 	sp+=2;
 	pc=addr;
-	t=20
-	}
-	t=8;
+	t=20; m=0;
+	} else {
+	t=8; m=1;
 }
 
 //0xD9
@@ -2421,19 +2214,16 @@ var reti = function(){
 	addr+= readByte(sp+1);
 	sp+=2;
 	pc=addr;
-	m=1;
-	t=16;
+	m=1; t=16;
 }
 
 //0xDA
 var jp_c_nn = function(){
 	if(carryFlag()){
 	pc=memory.readWord(pc+1);
-	t=16;
-	m=1;
+	t=16; m=1;
 	}else{
-	t=12;
-	m=3;
+	t=12; m=3;
 	}
 }
 
@@ -2442,14 +2232,12 @@ var jp_c_nn = function(){
 
 //0xDC
 var call_c_nn = function(){
-	m=3;
 	if(carryFlag()){
 	memory.writeWord(pc+3,sp);
 	pc=memory.readWord(pc+1);
-	t=24;
+	t=24; m=0;
 	}else{
-	t=12;
-	pc+=2
+	t=12; m=3;
 }
 
 //0xDD
@@ -2464,24 +2252,22 @@ var sbc_a_n = function(){
 	if(a&0x0F < value&0x0F){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	a=(result&0x00ff);
-	m=1;
-	t=4;
 	setSubFlag();
+	m=1; t=4;
 }
 
 //0xDF
 var rst_18 =  function(){
 	memory.writeWord(pc+1, sp);
 	sp-=2;
-	pc=0x0018
-	m=1;
-	t=16;
+	pc=0x0018;
+	m=1; t=16;
 }
 
 //0xE0
 var ldh_n_a = function(){
 	a=memory.readByte(pc+1);
-	m=2;
+	m=2; t=8;
 	t=12;
 }
 	
@@ -2490,16 +2276,14 @@ var pop_hl = function{
 	l=memory.readByte(sp+1);
 	h=memory.readByte(sp+2);
 	sp+=2;
-	m=1;
-	t=12;
+	m=1; t=12;
 }
 
 //0xE2
 var ldh_c_a = function(){
 	var addr = 0xFF00 + c;
 	memory.writebye(a, addr);
-	m=2;
-	t=8
+	m=2; t=8;
 }
 
 //0xE3, 0xE4
@@ -2510,8 +2294,7 @@ var push_hl = function(){
 	memory.writeByte(h, sp);
 	memory.writeByte(l,sp-1);
 	sp-=2;
-	m=1;
-	t=16;
+	m=1; t=16;
 }
 
 //0xE6
@@ -2522,17 +2305,15 @@ var and_n = function(){
 	resetSubFlag();
 	setHalfFlag();
 	resetCarryFlag();
-	m=2;
-	t=8;
+	m=2; t=8;
 }
 
 //0xE7
 var rst_20 = function(){
 	memory.writeWord(pc+1, sp);
 	sp-=2;
-	pc=0x0020
-	m=1;
-	t=16;
+	pc=0x0020;
+	m=1; t=16;
 }
 
 //0xE8
@@ -2543,22 +2324,19 @@ var add_sp_d = function(){
 	resetSubFlag();
 	if(((sp&0x0F) + (value&0x0F))&0x10){setHalfFlag();}else {resetHalfFlag();}
 	if (sp>65535){setCarryFlag();} else {resetCarryFlag();}
-	m=2;
-	t=16;
+	m=2; t=16;
 }
 
 //0xE9
 var jp_hl = function(){
 	pc=memory.readByte(getAddr(h,l));
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0xEA
 var ld_nn_a = function();
 	writeByte(a, readWord(pc+1));
-	m=3;
-	t=16;
+	m=3; t=16;
 }
 
 //0xEE
@@ -2569,25 +2347,22 @@ var xor_n = function(){
 	resetSubFlag();
 	resetHalfFlag();
 	resetCarryFlag();
-	m=2;
-	t=8;
+	m=2; t=8;
 }
 
 //0xEF
 var rst_28 =  function(){
 	memory.writeWord(pc+1, sp);
 	sp-=2;
-	pc=0x0028
-	m=1;
-	t=16;
+	pc=0x0028;
+	m=1; t=16;
 }
 
 //0xF0
 var ldh_a_n = function(){
 	var addr=0xFF00+memory.readByte(pc+1);
 	a=memory.readByte(addr);
-	m=2;
-	t=12;
+	m=2; t=12;
 	}
 
 //0xF1
@@ -2595,23 +2370,20 @@ var pop_af = function(){
 	f=memory.readByte(sp+1);
 	a=memory.readByte(sp+2);
 	sp+=2;
-	m=1;
-	t=12;	
+	m=1; t=12;	
 }
 	
 //0xF2
 var ld_a_c = function(){
 	var addr=0xFF00+c;
 	a=memory.readByte(addr);
-	m=1;
-	t=8;
+	m=1; t=8;
 }
 
 //0xF3
 var di = function(){
 	i=false;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0xF5
@@ -2619,8 +2391,7 @@ var push_af = function(){
 	memory.writeByte(a, sp);
 	memory.writeByte(f,sp-1);
 	sp-=2;
-	m=1;
-	t=16;
+	m=1; t=16;
 }
 
 //0xF7
@@ -2630,17 +2401,15 @@ var or_n = function(){
 	resetSubFlag();
 	resetHalfFlag();
 	resetCarryFlag();
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0xF8
 var rst_30 = function(){
 	memory.writeWord(pc+1, sp);
 	sp-=2;
-	pc=0x0030
-	m=1;
-	t=16;
+	pc=0x0030;
+	m=1; t=16;
 }
 
 //0xF9
@@ -2650,32 +2419,28 @@ var ldhl_sp_d = function(){
 	l=value&0x00FF;
 	if (value>65535){setCarryFlag();} else {resetCarryFlag();}
 	if(((sp&0x0F00) + (value&0x0F00))&0x1000){setHalfFlag();}else {resetHalfFlag();}
-	m=2;
-	t=12;
 	resetZeroFlag();
 	resetSubFlag();
+	m=2; t=12;
 }
 
 //0xFA
 var ld_sp_hl = function(){
 	sp=h<<8;
 	sp+=l;
-	m=1;
-	t=8;
+	m=1; t=8;
 }
 	
 //0xFB
 var ld_a_nn = function(){
 	a=readWord(pc+1);
-	m=3;
-	t=16;
+	m=3; t=16;
 }
 
 //0xFC
 var ei= function(){
 	i=true;
-	m=1;
-	t=4;
+	m=1; t=4;
 }
 
 //0xFE
@@ -2686,17 +2451,15 @@ var cp_n = function
 	if(a&0x0F < value&0x0F){setHalfFlag();}else {resetHalfFlag();}
 	if (result === 0){setZeroFlag();}else{resetZeroFlag();}
 	setSubFlag();
-	m=2;
-	t=8;
+	m=2; t=8;
 }
 
 //0xFF
 var rst_38 =  function(){
 	memory.writeWord(pc+1, sp);
 	sp-=2;
-	pc=0x0038
-	m=1;
-	t=16;
+	pc=0x0038;
+	m=1; t=16;
 }
 
 //---------------------//
@@ -2712,8 +2475,7 @@ var rlc_b = function(){
 	if (b===0){setZeroFlag();} else {resetZeroFlag();}
 	resetHalfFlag();
 	resetSubFlag();
-	m=2;
-	t=8;
+	m=2; t=8;
 }
 
 //0x01
@@ -2725,8 +2487,7 @@ var rlc_c = function(){
 	if (c===0){setZeroFlag();} else {resetZeroFlag();}
 	resetHalfFlag();
 	resetSubFlag();
-	m=2;
-	t=8;
+	m=2; t=8;
 }
 
 //0x02
@@ -2738,8 +2499,7 @@ var rlc_d = function(){
 	if (d===0){setZeroFlag();} else {resetZeroFlag();}
 	resetHalfFlag();
 	resetSubFlag();
-	m=2;
-	t=8;
+	m=2; t=8;
 }
 
 //0x03
@@ -2751,8 +2511,7 @@ var rlc_e = function(){
 	if (e===0){setZeroFlag();} else {resetZeroFlag();}
 	resetHalfFlag();
 	resetSubFlag();
-	m=2;
-	t=8;
+	m=2; t=8;
 }
 
 //0x04
@@ -2764,8 +2523,7 @@ var rlc_h = function(){
 	if (h===0){setZeroFlag();} else {resetZeroFlag();}
 	resetHalfFlag();
 	resetSubFlag();
-	m=2;
-	t=8;
+	m=2; t=8;
 }
 
 //0x05
@@ -2777,8 +2535,7 @@ var rlc_l = function(){
 	if (l===0){setZeroFlag();} else {resetZeroFlag();}
 	resetHalfFlag();
 	resetSubFlag();
-	m=2;
-	t=8;
+	m=2; t=8;
 }
 
 //0x06
@@ -2792,8 +2549,7 @@ var rlc_hl = function(){
 	if (value===0){setZeroFlag();} else {resetZeroFlag();}
 	resetHalfFlag();
 	resetSubFlag();
-	m=2;
-	t=8;
+	m=2; t=16;
 }
 
 //0x07
@@ -2805,8 +2561,7 @@ var rlc_a = function(){
 	if (a===0){setZeroFlag();} else {resetZeroFlag();}
 	resetHalfFlag();
 	resetSubFlag();
-	m=2;
-	t=8;
+	m=2; t=8;
 }
 
 //0x08
@@ -2818,8 +2573,7 @@ var rrc_b = function(){
 	if(b===0){setZeroFlag();} else {resetZeroFlag();}
 	resetSubFlag();
 	resetHalfFlag();
-	m=2;
-	t=8;
+	m=2; t=8;
 }		
 
 //0x09
@@ -2831,8 +2585,7 @@ var rrc_c = function(){
 	if(c===0){setZeroFlag();} else {resetZeroFlag();}
 	resetSubFlag();
 	resetHalfFlag();
-	m=2;
-	t=8;
+	m=2; t=8;
 }		
 
 //0x0A
@@ -2844,8 +2597,7 @@ var rrc_d = function(){
 	if(d===0){setZeroFlag();} else {resetZeroFlag();}
 	resetSubFlag();
 	resetHalfFlag();
-	m=2;
-	t=8;
+	m=2; t=8;
 }	
 
 //0x0B	
@@ -2857,8 +2609,7 @@ var rrc_e = function(){
 	if(e===0){setZeroFlag();} else {resetZeroFlag();}
 	resetSubFlag();
 	resetHalfFlag();
-	m=2;
-	t=8;
+	m=2; t=8;
 }		
 
 
@@ -2871,8 +2622,7 @@ var rrc_h = function(){
 	if(h===0){setZeroFlag();} else {resetZeroFlag();}
 	resetSubFlag();
 	resetHalfFlag();
-	m=2;
-	t=8;
+	m=2; t=8;
 }		
 
 //0x0D
@@ -2884,8 +2634,7 @@ var rrc_l = function(){
 	if(l===0){setZeroFlag();} else {resetZeroFlag();}
 	resetSubFlag();
 	resetHalfFlag();
-	m=2;
-	t=8;
+	m=2; t=8;
 }		
 
 //0x0E
@@ -2899,8 +2648,7 @@ var rrc_hl = function(){
 	if(b===0){setZeroFlag();} else {resetZeroFlag();}
 	resetSubFlag();
 	resetHalfFlag();
-	m=2;
-	t=8;
+	m=2; t=16;
 }		
 
 //0x0F
@@ -2912,8 +2660,7 @@ var rrc_a = function(){
 	if(a===0){setZeroFlag();} else {resetZeroFlag();}
 	resetSubFlag();
 	resetHalfFlag();
-	m=2;
-	t=8;
+	m=2; t=8;
 }		
 
 //0x10
@@ -2926,8 +2673,7 @@ var rl_b = function(){
 	if(b===0){setZeroFlag();} else {resetZeroFlag();}
 	resetHalfFlag();
 	resetSubFlag();
-	m=2;
-	t=8;
+	m=2; t=8;
 }
 
 //0x11
@@ -2940,8 +2686,7 @@ var rl_c = function(){
 	if(c===0){setZeroFlag();} else {resetZeroFlag();}
 	resetHalfFlag();
 	resetSubFlag();
-	m=2;
-	t=8;
+	m=2; t=8;
 }
 
 //0x12
@@ -2954,8 +2699,7 @@ var rl_d = function(){
 	if(d===0){setZeroFlag();} else {resetZeroFlag();}
 	resetHalfFlag();
 	resetSubFlag();
-	m=2;
-	t=8;
+	m=2; t=8;
 }
 
 //0x13
@@ -2968,8 +2712,7 @@ var rl_e = function(){
 	if(e===0){setZeroFlag();} else {resetZeroFlag();}
 	resetHalfFlag();
 	resetSubFlag();
-	m=2;
-	t=8;
+	m=2; t=8;
 }
 
 //0x14
@@ -2982,8 +2725,7 @@ var rl_h = function(){
 	if(h===0){setZeroFlag();} else {resetZeroFlag();}
 	resetHalfFlag();
 	resetSubFlag();
-	m=2;
-	t=8;
+	m=2; t=8;
 }
 
 //0x15
@@ -2996,8 +2738,7 @@ var rl_l = function(){
 	if(l===0){setZeroFlag();} else {resetZeroFlag();}
 	resetHalfFlag();
 	resetSubFlag();
-	m=2;
-	t=8;
+	m=2; t=8;
 }
 
 //0x16
@@ -3012,8 +2753,7 @@ var rl_hl = function(){
 	if(value===0){setZeroFlag();} else {resetZeroFlag();}
 	resetHalfFlag();
 	resetSubFlag();
-	m=2;
-	t=8;
+	m=2; t=16;
 }
 
 //0x17
@@ -3026,8 +2766,7 @@ var rl_a = function(){
 	if(a===0){setZeroFlag();} else {resetZeroFlag();}
 	resetHalfFlag();
 	resetSubFlag();
-	m=2;
-	t=8;
+	m=2; t=8;
 }
 
 //0x18
@@ -3040,8 +2779,7 @@ var rr_b = function(){
 	if(a===0){setZeroFlag();} else {resetZeroFlag();}
 	resetHalfFlag();
 	resetSubFlag();
-	m=2;
-	t=8;
+	m=2; t=8;
 }
 
 //0x19
@@ -3054,10 +2792,7 @@ var rr_c = function(){
 	if(c===0){setZeroFlag();} else {resetZeroFlag();}
 	resetHalfFlag();
 	resetSubFlag();
-	m=2;
-	t=8;
-}
-
+	m=2; t=8;
 }
 
 //0x1A
@@ -3070,8 +2805,7 @@ var rr_d = function(){
 	if(d===0){setZeroFlag();} else {resetZeroFlag();}
 	resetHalfFlag();
 	resetSubFlag();
-	m=2;
-	t=8;
+	m=2; t=8;
 }
 
 
@@ -3085,8 +2819,7 @@ var rr_e = function(){
 	if(e===0){setZeroFlag();} else {resetZeroFlag();}
 	resetHalfFlag();
 	resetSubFlag();
-	m=2;
-	t=8;
+	m=2; t=8;
 }
 
 //0x1C
@@ -3099,8 +2832,7 @@ var rr_h = function(){
 	if(c===0){setZeroFlag();} else {resetZeroFlag();}
 	resetHalfFlag();
 	resetSubFlag();
-	m=2;
-	t=8;
+	m=2; t=8;
 }
 
 //0x1D
@@ -3113,8 +2845,7 @@ var rr_l = function(){
 	if(l===0){setZeroFlag();} else {resetZeroFlag();}
 	resetHalfFlag();
 	resetSubFlag();
-	m=2;
-	t=8;
+	m=2; t=8;
 }
 
 //0x1E
@@ -3129,8 +2860,7 @@ var rr_hl = function(){
 	if(l===0){setZeroFlag();} else {resetZeroFlag();}
 	resetHalfFlag();
 	resetSubFlag();
-	m=2;
-	t=8;
+	m=2; t=16;
 }
 
 //0x1F
@@ -3143,8 +2873,7 @@ var rr_a = function(){
 	if(a===0){setZeroFlag();} else {resetZeroFlag();}
 	resetHalfFlag();
 	resetSubFlag();
-	m=2;
-	t=8;
+	m=2; t=8; 
 }
 
 //0x20
@@ -3155,8 +2884,7 @@ var sla_b = function(){
 	if(b===0){setZeroFlag();} else {resetZeroFlag();}
 	resetHalfFlag();
 	resetSubFlag();
-	m=2;
-	t=8;
+	m=2; t=8; 
 }
 
 //0x21
@@ -3167,8 +2895,7 @@ var sla_c = function(){
 	if(c===0){setZeroFlag();} else {resetZeroFlag();}
 	resetHalfFlag();
 	resetSubFlag();
-	m=2;
-	t=8;
+	m=2; t=8;
 }
 
 //0x22
@@ -3179,8 +2906,7 @@ var sla_d = function(){
 	if(d===0){setZeroFlag();} else {resetZeroFlag();}
 	resetHalfFlag();
 	resetSubFlag();
-	m=2;
-	t=8;
+	m=2; t=8;
 }
 
 //0x23
@@ -3191,8 +2917,7 @@ var sla_e = function(){
 	if(e===0){setZeroFlag();} else {resetZeroFlag();}
 	resetHalfFlag();
 	resetSubFlag();
-	m=2;
-	t=8;
+	m=2; t=8;
 }
 
 //0x24
@@ -3203,8 +2928,7 @@ var sla_h = function(){
 	if(h===0){setZeroFlag();} else {resetZeroFlag();}
 	resetHalfFlag();
 	resetSubFlag();
-	m=2;
-	t=8;
+	m=2; t=8;
 }
 
 //0x25
@@ -3215,8 +2939,7 @@ var sla_l = function(){
 	if(l===0){setZeroFlag();} else {resetZeroFlag();}
 	resetHalfFlag();
 	resetSubFlag();
-	m=2;
-	t=8;
+	m=2; t=8;
 }
 
 //0x26
@@ -3229,8 +2952,7 @@ var sla_hl = function(){
 	if(value===0){setZeroFlag();} else {resetZeroFlag();}
 	resetHalfFlag();
 	resetSubFlag();
-	m=2;
-	t=8;
+	m=2; t=16;
 }
 
 //0x27
@@ -3241,8 +2963,7 @@ var sla_a = function(){
 	if(a===0){setZeroFlag();} else {resetZeroFlag();}
 	resetHalfFlag();
 	resetSubFlag();
-	m=2;
-	t=8;
+	m=2; t=8;
 }
 
 //0x28
@@ -3254,8 +2975,7 @@ var sra_b =function(){
 	if(b===0){setZeroFlag();} else {resetZeroFlag();}
 	resetHalfFlag();
 	resetSubFlag();
-	m=2;
-	t=8;
+	m=2; t=8;
 }
 
 //0x29
@@ -3267,8 +2987,7 @@ var sra_c =function(){
 	if(c===0){setZeroFlag();} else {resetZeroFlag();}
 	resetHalfFlag();
 	resetSubFlag();
-	m=2;
-	t=8;
+	m=2; t=8;
 }
 
 //0x2A
@@ -3280,8 +2999,7 @@ var sra_d =function(){
 	if(d===0){setZeroFlag();} else {resetZeroFlag();}
 	resetHalfFlag();
 	resetSubFlag();
-	m=2;
-	t=8;
+	m=2; t=8;
 }
 
 //0x2B
@@ -3293,8 +3011,7 @@ var sra_e =function(){
 	if(e===0){setZeroFlag();} else {resetZeroFlag();}
 	resetHalfFlag();
 	resetSubFlag();
-	m=2;
-	t=8;
+	m=2; t=8;
 }
 
 //0x2C
@@ -3306,8 +3023,7 @@ var sra_h =function(){
 	if(h===0){setZeroFlag();} else {resetZeroFlag();}
 	resetHalfFlag();
 	resetSubFlag();
-	m=2;
-	t=8;
+	m=2; t=8;
 }
 
 //0x2D
@@ -3319,8 +3035,7 @@ var sra_l =function(){
 	if(l===0){setZeroFlag();} else {resetZeroFlag();}
 	resetHalfFlag();
 	resetSubFlag();
-	m=2;
-	t=8;
+	m=2; t=8;
 }
 
 //0x2E
@@ -3334,8 +3049,7 @@ var sra_hl =function(){
 	if(value===0){setZeroFlag();} else {resetZeroFlag();}
 	resetHalfFlag();
 	resetSubFlag();
-	m=2;
-	t=8;
+	m=2; t=16;
 }
 
 //0x2F
@@ -3347,10 +3061,1541 @@ var sra_a =function(){
 	if(a===0){setZeroFlag();} else {resetZeroFlag();}
 	resetHalfFlag();
 	resetSubFlag();
-	m=2;
-	t=8;
+	m=2; t=8;
 }
 
+//0x30
+var swap_b = function(){
+	if (b===0){setZeroFlag();}
+	else {
+	var temp = b&0x0F;
+	b>>4;
+	temp<<4;
+	b&=temp;
+	resetZeroFlag();
+	}
+	resetHalfFlag();
+	resetSubFlag();
+	resetCarryFlag();
+	m=2; t=8;
+}
+
+//0x31
+var swap_c = function(){
+	if (c===0){setZeroFlag();}
+	else {
+	var temp = c&0x0F;
+	c>>4;
+	temp<<4;
+	c&=temp;
+	resetZeroFlag();
+	}
+	resetHalfFlag();
+	resetSubFlag();
+	resetCarryFlag();
+	m=2; t=8;
+}
+
+//0x32
+var swap_d = function(){
+	if (d===0){setZeroFlag();}
+	else {
+	var temp = d&0x0F;
+	d>>4;
+	temp<<4;
+	d&=temp;
+	resetZeroFlag();
+	}
+	resetHalfFlag();
+	resetSubFlag();
+	resetCarryFlag();
+	m=2; t=8;
+}
+
+//0x33
+var swap_e = function(){
+	if (e===0){setZeroFlag();}
+	else {
+	var temp = e&0x0F;
+	e>>4;
+	temp<<4;
+	e&=temp;
+	resetZeroFlag();
+	}
+	resetHalfFlag();
+	resetSubFlag();
+	resetCarryFlag();
+	m=2; t=8;
+}
+
+//0x34
+var swap_h = function(){
+	if (h===0){setZeroFlag();}
+	else {
+	var temp = h&0x0F;
+	h>>4;
+	temp<<4;
+	h&=temp;
+	resetZeroFlag();
+	}
+	resetHalfFlag();
+	resetSubFlag();
+	resetCarryFlag();
+	m=2; t=8;
+}
+
+//0x35
+var swap_l = function(){
+	if (l===0){setZeroFlag();}
+	else {
+	var temp = l&0x0F;
+	l>>4;
+	temp<<4;
+	l&=temp;
+	resetZeroFlag();
+	}
+	resetHalfFlag();
+	resetSubFlag();
+	resetCarryFlag();
+	m=2; t=8;
+}
+
+//0x36
+var swap_hl = function(){
+	var value=memory.readByte(pc+1);
+	if (value===0){setZeroFlag();}
+	else {
+	var temp = value&0x0F;
+	value>>4;
+	temp<<4;
+	value&=temp;
+	resetZeroFlag();
+	memory.writeByte(value, getAddr(h,l));
+	}
+	resetHalfFlag();
+	resetSubFlag();
+	resetCarryFlag();
+	m=2; t=16;
+}
+
+//0x37
+var swap_a = function(){
+	if (a===0){setZeroFlag();}
+	else {
+	var temp = a&0x0F;
+	a>>4;
+	temp<<4;
+	a&=temp;
+	resetZeroFlag();
+	}
+	resetHalfFlag();
+	resetSubFlag();
+	resetCarryFlag();
+	m=2; t=8;
+}
+
+//0x38
+var srl_b = function();
+	if (b&0x01){setCarryFlag();} else {resetCarryFlag();}
+	b>>1;
+	if (b===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2; t=8;
+}
+
+//0x39
+var srl_c = function();
+	if (c&0x01){setCarryFlag();} else {resetCarryFlag();}
+	c>>1;
+	if (c===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2; t=8;
+}
+
+//0x3A
+var srl_d = function();
+	if (d&0x01){setCarryFlag();} else {resetCarryFlag();}
+	d>>1;
+	if (d===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2; t=8;
+}
+
+//0x3B
+var srl_e = function();
+	if (e&0x01){setCarryFlag();} else {resetCarryFlag();}
+	e>>1;
+	if (e===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2; t=8;
+}
+
+//0x3C
+var srl_h = function();
+	if (h&0x01){setCarryFlag();} else {resetCarryFlag();}
+	h>>1;
+	if (h===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2; t=8;
+}
+
+//0x3D
+var srl_l = function();
+	if (l&0x01){setCarryFlag();} else {resetCarryFlag();}
+	l>>1;
+	if (l===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2; t=8;
+}
+
+//0x3E
+var srl_hl = function();
+	var value=memory.readByte(pc+1);
+	if (value&0x01){setCarryFlag();} else {resetCarryFlag();}
+	value>>1;
+	memory.writeByte(value, getAddr(h,l));
+	if (value===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2; t=16;
+}
+
+//0x3F
+var srl_a = function();
+	if (a&0x01){setCarryFlag();} else {resetCarryFlag();}
+	a>>1;
+	if (a===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2; t=8;
+}
+
+//0x40
+var bit_0_b = funtion {
+	if(b&0x01){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x41
+var bit_0_c = funtion {
+	if(c&0x01){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x42
+var bit_0_d = funtion {
+	if(d&0x01){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x43
+var bit_0_e = funtion {
+	if(e&0x01){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x44
+var bit_0_h = funtion {
+	if(h&0x01){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x45
+var bit_0_l = funtion {
+	if(l&0x01){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x46
+var bit_0_hl = funtion {
+	var value=memory.readByte(getAddr(h,l));
+	if(value&0x01){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=16;
+} 
+
+//0x47
+var bit_0_a = funtion {
+	if(a&0x01){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x48
+var bit_1_b = funtion {
+	if(b&0x02){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x49
+var bit_1_c = funtion {
+	if(c&0x02){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x4A
+var bit_1_d = funtion {
+	if(d&0x02){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x4B
+var bit_1_e = funtion {
+	if(e&0x02){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x4C
+var bit_1_h = funtion {
+	if(h&0x02){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x4D
+var bit_1_l = funtion {
+	if(l&0x02){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x4E
+var bit_1_hl = funtion {
+	var value=memory.readByte(getAddr(h,l));
+	if(value&0x02){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=16;
+} 
+
+//0x4F
+var bit_1_a = funtion {
+	if(a&0x02){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x50
+var bit_2_b = funtion {
+	if(b&0x04){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x51
+var bit_2_c = funtion {
+	if(c&0x04){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x52
+var bit_2_d = funtion {
+	if(d&0x04){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x53
+var bit_2_e = funtion {
+	if(e&0x04){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x54
+var bit_2_h = funtion {
+	if(h&0x04){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x55
+var bit_2_l = funtion {
+	if(l&0x04){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x55
+var bit_2_hl = funtion {
+	var value=memory.readByte(getAddr(h,l));
+	if(value&0x04){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=16;
+} 
+
+//0x57
+var bit_2_a = funtion {
+	if(a&0x04){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x58
+var bit_3_b = funtion {
+	if(b&0x08){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x59
+var bit_3_c = funtion {
+	if(c&0x08){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x5A
+var bit_3_d = funtion {
+	if(d&0x08){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x5B
+var bit_3_e = funtion {
+	if(e&0x08){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x5C
+var bit_3_h = funtion {
+	if(h&0x08){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x5D
+var bit_3_l = funtion {
+	if(l&0x08){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x5E
+var bit_3_hl = funtion {
+	var value=memory.readByte(getAddr(h,l));
+	if(value&0x08){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=16;
+} 
+
+//0x5F
+var bit_3_a = funtion {
+	if(a&0x08){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x60
+var bit_4_b = funtion {
+	if(b&0x10){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x61
+var bit_4_c = funtion {
+	if(c&0x10){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x62
+var bit_4_d = funtion {
+	if(d&0x10){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x63
+var bit_4_e = funtion {
+	if(e&0x10){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x64
+var bit_4_h = funtion {
+	if(h&0x10){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x65
+var bit_4_l = funtion {
+	if(l&0x10){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x66
+var bit_4_hl = funtion {
+	var value=memory.readByte(getAddr(h,l));
+	if(value&0x10){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=16;
+} 
+
+
+//0x67
+var bit_4_a = funtion {
+	if(a&0x10){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x68
+var bit_5_b = funtion {
+	if(b&0x20){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x69
+var bit_5_c = funtion {
+	if(c&0x20){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x6A
+var bit_5_d = funtion {
+	if(d&0x20){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x6B
+var bit_5_e = funtion {
+	if(e&0x20){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x6C
+var bit_5_h = funtion {
+	if(h&0x20){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x6D
+var bit_5_l = funtion {
+	if(l&0x20){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x6E
+var bit_5_hl = funtion {
+	var value=memory.readByte(getAddr(h,l));
+	if(value&0x20){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=16;
+} 
+
+//0x6F
+var bit_5_a = funtion {
+	if(a&0x20){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x70
+var bit_6_b = funtion {
+	if(b&0x40){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x71
+var bit_6_c = funtion {
+	if(c&0x40){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x72
+var bit_6_d = funtion {
+	if(d&0x40){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x73
+var bit_6_e = funtion {
+	if(e&0x40){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x74
+var bit_6_h = funtion {
+	if(h&0x40){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x75
+var bit_6_l = funtion {
+	if(l&0x40){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x76
+var bit_6_hl = funtion {
+	var value=memory.readByte(getAddr(h,l));
+	if(value&0x40){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=16;
+} 
+
+//0x77
+var bit_6_a = funtion {
+	if(a&0x40){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x78
+var bit_7_b = funtion {
+	if(b&0x80){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x79
+var bit_7_c = funtion {
+	if(c&0x80){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x7A
+var bit_7_d = funtion {
+	if(d&0x80){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x7B
+var bit_7_e = funtion {
+	if(e&0x80){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x7C
+var bit_7_h = funtion {
+	if(h&0x80){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x7D
+var bit_4_l = funtion {
+	if(l&0x80){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x7E
+var bit_7_hl = funtion {
+	var value=memory.readByte(getAddr(h,l));
+	if(value&0x80){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=16;
+} 
+
+//0x7F
+var bit_7_a = funtion {
+	if(a&0x80){resetZeroFlag();} else {setZeroFlag();}
+	resetSubFlag();
+	setHalfFlag();
+	m=2; t=8;
+} 
+
+//0x80
+var res_0_b = function(){
+	b&=0xFE;
+	m=2; t=8;
+}
+
+//0x81
+var res_0_c = function(){
+	c&=0xFE;
+	m=2; t=8;
+}
+
+//0x82
+var res_0_d = function(){
+	d&=0xFE;
+	m=2; t=8;
+}
+
+//0x83
+var res_0_e = function(){
+	e&=0xFE;
+	m=2; t=8;
+}
+
+//0x84
+var res_0_h = function(){
+	h&=0xFE;
+	m=2; t=8;
+}
+
+//0x85
+var res_0_l = function(){
+	l&=0xFE;
+	m=2; t=8;
+}
+
+//0x86
+var res_0_hl = function(){
+	var value=memory.readByte(getAddr(h,l));
+	value&=0xFE;
+	memory.writeByte(value, getAddr(h,l));
+	m=2; t=8;
+}
+
+//0x87
+var res_0_a = function(){
+	a&=0xFE;
+	m=2; t=8;
+}
+
+//0x88
+var res_1_b = function(){
+	b&=0xFD;
+	m=2; t=8;
+}
+
+//0x89
+var res_1_c = function(){
+	c&=0xFD;
+	m=2; t=8;
+}
+
+//0x8A
+var res_1_d = function(){
+	d&=0xFD;
+	m=2; t=8;
+}
+
+//0x8B
+var res_1_e = function(){
+	e&=0xFD;
+	m=2; t=8;
+}
+
+//0x8C
+var res_1_h = function(){
+	h&=0xFD;
+	m=2; t=8;
+}
+
+//0x8D
+var res_1_l = function(){
+	l&=0xFD;
+	m=2; t=8;
+}
+
+//0x8E
+var res_1_hl = function(){
+	var value=memory.readByte(getAddr(h,l));
+	value&=0xFD;
+	memory.writeByte(value, getAddr(h,l));
+	m=2; t=8;
+}
+
+//0x8F
+var res_1_a = function(){
+	a&=0xFD;
+	m=2; t=8;
+}
+
+//0x90
+var res_2_b = function(){
+	b&=0xFB;
+	m=2; t=8;
+}
+
+//0x91
+var res_2_c = function(){
+	c&=0xFB;
+	m=2; t=8;
+}
+
+//0x92
+var res_2_d = function(){
+	d&=0xFB;
+	m=2; t=8;
+}
+
+//0x93
+var res_2_e = function(){
+	e&=0xFB;
+	m=2; t=8;
+}
+
+//0x94
+var res_2_h = function(){
+	h&=0xFB;
+	m=2; t=8;
+}
+
+//0x95
+var res_2_l = function(){
+	l&=0xFB;
+	m=2; t=8;
+}
+
+//0x96
+var res_2_hl = function(){
+	var value=memory.readByte(getAddr(h,l));
+	value&=0xFB;
+	memory.writeByte(value, getAddr(h,l));
+	m=2; t=8;
+}
+
+//0x97
+var res_2_a = function(){
+	a&=0xFB;
+	m=2; t=8;
+}
+
+//0x98
+var res_3_b = function(){
+	b&=0xF7;
+	m=2; t=8;
+}
+
+//0x99
+var res_3_c = function(){
+	c&=0xF7;
+	m=2; t=8;
+}
+
+//0x9A
+var res_3_d = function(){
+	d&=0xF7;
+	m=2; t=8;
+}
+
+//0x9B
+var res_3_e = function(){
+	e&=0xF7;
+	m=2; t=8;
+}
+
+//0x9C
+var res_3_h = function(){
+	h&=0xF7;
+	m=2; t=8;
+}
+
+//0x9D
+var res_3_l = function(){
+	l&=0xF7;
+	m=2; t=8;
+}
+
+//0x9E
+var res_3_hl = function(){
+	var value=memory.readByte(getAddr(h,l));
+	value&=0xF7;
+	memory.writeByte(value, getAddr(h,l));
+	m=2; t=8;
+}
+
+//0x9F
+var res_3_a = function(){
+	a&=0xF7;
+	m=2; t=8;
+}
+
+//0xA0
+var res_4_b = function(){
+	b&=0xEF;
+	m=2; t=8;
+}
+
+//0xA1
+var res_4_c = function(){
+	c&=0xEF;
+	m=2; t=8;
+}
+
+//0xA2
+var res_4_d = function(){
+	d&=0xEF;
+	m=2; t=8;
+}
+
+//0xA3
+var res_4_e = function(){
+	e&=0xEF;
+	m=2; t=8;
+}
+
+//0xA4
+var res_4_h = function(){
+	h&=0xEF;
+	m=2; t=8;
+}
+
+//0xA5
+var res_4_l = function(){
+	l&=0xEF;
+	m=2; t=8;
+}
+
+//0xA6
+var res_4_hl = function(){
+	var value=memory.readByte(getAddr(h,l));
+	value&=0xEF;
+	memory.writeByte(value, getAddr(h,l));
+	m=2; t=8;
+}
+
+//0xA7
+var res_4_a = function(){
+	a&=0xEF;
+	m=2; t=8;
+}
+
+//0xA8
+var res_5_b = function(){
+	b&=0xDF;
+	m=2; t=8;
+}
+
+//0xA9
+var res_5_c = function(){
+	c&=0xDF;
+	m=2; t=8;
+}
+
+//0xAA
+var res_5_d = function(){
+	d&=0xDF;
+	m=2; t=8;
+}
+
+//0xAB
+var res_5_e = function(){
+	e&=0xDF;
+	m=2; t=8;
+}
+
+//0xAC
+var res_5_h = function(){
+	h&=0xDF;
+	m=2; t=8;
+}
+
+//0xAD
+var res_5_l = function(){
+	l&=0xDF;
+	m=2; t=8;
+}
+
+//0xAE
+var res_5_hl = function(){
+	var value=memory.readByte(getAddr(h,l));
+	value&=0xDF;
+	memory.writeByte(value, getAddr(h,l));
+	m=2; t=8;
+}
+
+//0xAF
+var res_5_a = function(){
+	a&=0xDF;
+	m=2; t=8;
+}
+
+//0xB0
+var res_6_b = function(){
+	b&=0xBF;
+	m=2; t=8;
+}
+
+//0xB1
+var res_6_c = function(){
+	c&=0xBF;
+	m=2; t=8;
+}
+
+//0xB2
+var res_6_d = function(){
+	d&=0xBF;
+	m=2; t=8;
+}
+
+//0xB3
+var res_6_e = function(){
+	e&=0xBF;
+	m=2; t=8;
+}
+
+//0xB4
+var res_6_h = function(){
+	h&=0xBF;
+	m=2; t=8;
+}
+
+//0xB5
+var res_6_l = function(){
+	l&=0xBF;
+	m=2; t=8;
+}
+
+//0xB6
+var res_6_hl = function(){
+	var value=memory.readByte(getAddr(h,l));
+	value&=0xBF;
+	memory.writeByte(value, getAddr(h,l));
+	m=2; t=8;
+}
+
+//0xB7
+var res_6_a = function(){
+	a&=0xBF;
+	m=2; t=8;
+}
+
+//0xB8
+var res_7_b = function(){
+	b&=0x7F;
+	m=2; t=8;
+}
+
+//0xB9
+var res_7_c = function(){
+	c&=0x7F;
+	m=2; t=8;
+}
+
+//0xBA
+var res_7_d = function(){
+	d&=0x7F;
+	m=2; t=8;
+}
+
+//0xBB
+var res_7_e = function(){
+	e&=0x7F;
+	m=2; t=8;
+}
+
+//0xBC
+var res_7_h = function(){
+	h&=0x7F;
+	m=2; t=8;
+}
+
+//0xBD
+var res_7_l = function(){
+	l&=0x7F;
+	m=2; t=8;
+}
+
+//0xBE
+var res_7_hl = function(){
+	var value=memory.readByte(getAddr(h,l));
+	value&=0x7F;
+	memory.writeByte(value, getAddr(h,l));
+	m=2; t=8;
+}
+
+//0xBF
+var res_7_a = function(){
+	a&=0x7F;
+	m=2; t=8;
+}
+
+//0xC0
+var set_0_b = function(){
+	b|=0x01;
+	m=2; t=8;
+}
+
+//0xC1
+var res_0_c = function(){
+	c|=0x01;
+	m=2; t=8;
+}
+
+//0xC2
+var res_0_d = function(){
+	d|=0x01;
+	m=2; t=8;
+}
+
+//0xC3
+var res_0_e = function(){
+	e|=0x01;
+	m=2; t=8;
+}
+
+//0xC4
+var res_0_h = function(){
+	h|=0x01;
+	m=2; t=8;
+}
+
+//0xC5
+var res_0_l = function(){
+	l|=0x01;
+	m=2; t=8;
+}
+
+//0xC6
+var res_0_hl = function(){
+	var value=memory.readByte(getAddr(h,l));
+	value|=0x01;
+	memory.writeByte(value, getAddr(h,l));
+	m=2; t=8;
+}
+
+//0xC7
+var res_0_a = function(){
+	a|=0x01;
+	m=2; t=8;
+}
+
+//0xC8
+var res_1_b = function(){
+	b|=0x02;
+	m=2; t=8;
+}
+
+//0xC9
+var res_1_c = function(){
+	c|=0x02;
+	m=2; t=8;
+}
+
+//0xCA
+var res_1_d = function(){
+	d|=0x02;
+	m=2; t=8;
+}
+
+//0xCB
+var res_1_e = function(){
+	e|=0x02;
+	m=2; t=8;
+}
+
+//0xCC
+var res_1_h = function(){
+	h|=0x02;
+	m=2; t=8;
+}
+
+//0xCD
+var res_1_l = function(){
+	l|=0x02;
+	m=2; t=8;
+}
+
+//0xCE
+var res_1_hl = function(){
+	var value=memory.readByte(getAddr(h,l));
+	value|=0x02;
+	memory.writeByte(value, getAddr(h,l));
+	m=2; t=8;
+}
+
+//0xCF
+var res_1_a = function(){
+	a|=0x02;
+	m=2; t=8;
+}
+
+//0xD0
+var res_2_b = function(){
+	b|=04;
+	m=2; t=8;
+}
+
+//0xD1
+var res_2_c = function(){
+	c|=04;
+	m=2; t=8;
+}
+
+//0xD2
+var res_2_d = function(){
+	d|=04;
+	m=2; t=8;
+}
+
+//0xD3
+var res_2_e = function(){
+	e|=04;
+	m=2; t=8;
+}
+
+//0xD4
+var res_2_h = function(){
+	h|=04;
+	m=2; t=8;
+}
+
+//0xD5
+var res_2_l = function(){
+	l|=04;
+	m=2; t=8;
+}
+
+//0xD6
+var res_2_hl = function(){
+	var value=memory.readByte(getAddr(h,l));
+	value|=04;
+	memory.writeByte(value, getAddr(h,l));
+	m=2; t=8;
+}
+
+//0xD7
+var res_2_a = function(){
+	a|=04;
+	m=2; t=8;
+}
+
+//0xD8
+var res_3_b = function(){
+	b|=0x08;
+	m=2; t=8;
+}
+
+//0xD9
+var res_3_c = function(){
+	c|=0x08;
+	m=2; t=8;
+}
+
+//0xDA
+var res_3_d = function(){
+	d|=0x08;
+	m=2; t=8;
+}
+
+//0xDB
+var res_3_e = function(){
+	e|=0x08;
+	m=2; t=8;
+}
+
+//0xDC
+var res_3_h = function(){
+	h|=0x08;
+	m=2; t=8;
+}
+
+//0xDD
+var res_3_l = function(){
+	l|=0x08;
+	m=2; t=8;
+}
+
+//0xDE
+var res_3_hl = function(){
+	var value=memory.readByte(getAddr(h,l));
+	value|=0x08;
+	memory.writeByte(value, getAddr(h,l));
+	m=2; t=8;
+}
+
+//0xDF
+var res_3_a = function(){
+	a|=0x08;
+	m=2; t=8;
+}
+
+//0xE0
+var res_4_b = function(){
+	b|=0x10;
+	m=2; t=8;
+}
+
+//0xE1
+var res_4_c = function(){
+	c|=0x10;
+	m=2; t=8;
+}
+
+//0xE2
+var res_4_d = function(){
+	d|=0x10;
+	m=2; t=8;
+}
+
+//0xE3
+var res_4_e = function(){
+	e|=0x10;
+	m=2; t=8;
+}
+
+//0xE4
+var res_4_h = function(){
+	h|=0x10;
+	m=2; t=8;
+}
+
+//0xE5
+var res_4_l = function(){
+	l|=0x10;
+	m=2; t=8;
+}
+
+//0xE6
+var res_4_hl = function(){
+	var value=memory.readByte(getAddr(h,l));
+	value|=0x10;
+	memory.writeByte(value, getAddr(h,l));
+	m=2; t=8;
+}
+
+//0xE7
+var res_4_a = function(){
+	a|=0x10;
+	m=2; t=8;
+}
+
+//0xE8
+var res_5_b = function(){
+	b|=0x20;
+	m=2; t=8;
+}
+
+//0xE9
+var res_5_c = function(){
+	c|=0x20;
+	m=2; t=8;
+}
+
+//0xEA
+var res_5_d = function(){
+	d|=0x20;
+	m=2; t=8;
+}
+
+//0xEB
+var res_5_e = function(){
+	e|=0x20;
+	m=2; t=8;
+}
+
+//0xEC
+var res_5_h = function(){
+	h|=0x20;
+	m=2; t=8;
+}
+
+//0xED
+var res_5_l = function(){
+	l|=0x20;
+	m=2; t=8;
+}
+
+//0xEE
+var res_5_hl = function(){
+	var value=memory.readByte(getAddr(h,l));
+	value|=0x20;
+	memory.writeByte(value, getAddr(h,l));
+	m=2; t=8;
+}
+
+//0xEF
+var res_5_a = function(){
+	a|=0x20;
+	m=2; t=8;
+}
+
+//0xF0
+var res_6_b = function(){
+	b|=0x40;
+	m=2; t=8;
+}
+
+//0xF1
+var res_6_c = function(){
+	c|=0x40;
+	m=2; t=8;
+}
+
+//0xF2
+var res_6_d = function(){
+	d|=0x40;
+	m=2; t=8;
+}
+
+//0xF3
+var res_6_e = function(){
+	e|=0x40;
+	m=2; t=8;
+}
+
+//0xF4
+var res_6_h = function(){
+	h|=0x40;
+	m=2; t=8;
+}
+
+//0xF5
+var res_6_l = function(){
+	l|=0x40;
+	m=2; t=8;
+}
+
+//0xF6
+var res_6_hl = function(){
+	var value=memory.readByte(getAddr(h,l));
+	value|=0x40;
+	memory.writeByte(value, getAddr(h,l));
+	m=2; t=8;
+}
+
+//0xF7
+var res_6_a = function(){
+	a|=0x40;
+	m=2; t=8;
+}
+
+//0xF8
+var res_7_b = function(){
+	b|=0x80;
+	m=2; t=8;
+}
+
+//0xF9
+var res_7_c = function(){
+	c|=0x80;
+	m=2; t=8;
+}
+
+//0xFA
+var res_7_d = function(){
+	d|=0x80;
+	m=2; t=8;
+}
+
+//0xFB
+var res_7_e = function(){
+	e|=0x80;
+	m=2; t=8;
+}
+
+//0xFC
+var res_7_h = function(){
+	h|=0x80;
+	m=2; t=8;
+}
+
+//0xFD
+var res_7_l = function(){
+	l|=0x80;
+	m=2; t=8;
+}
+
+//0xFE
+var res_7_hl = function(){
+	var value=memory.readByte(getAddr(h,l));
+	value|=0x80;
+	memory.writeByte(value, getAddr(h,l));
+	m=2; t=8;
+}
+
+//0xFF
+var res_7_a = function(){
+	a|=0x80;
+	m=2; t=8;
+}
 
 
 
