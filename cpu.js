@@ -435,10 +435,10 @@ var ld_c_n = function(){
 
 //0x0F
 var rrca = function(){
-	var varrybit = (a<<7)&0x80;
+	var carrybit = (a<<7)&0x80;
 	if (carrybit){setCarryFlag();} else {resetCarryFlag();}
 	a>>1;
-	a+=carrybit
+	a+=carrybit;
 	if(a===0){setZeroFlag();} else {resetZeroFlag();}
 	resetSubFlag();
 	resetHalfFlag();
@@ -521,7 +521,7 @@ var rla = function(){
 	resetHalfFlag();
 	resetSubFlag();
 	m=1;
-	t=4
+	t=4;
 }
 
 //0x18
@@ -595,7 +595,7 @@ var ld_e_n = function(){
 //0x1F
 var rra = function(){
 	var carry = carryFlag()?0x80:0;
-	if (a&0x10){setCarryFlag();} else {resetCarryFlag();}
+	if (a&0x01){setCarryFlag();} else {resetCarryFlag();}
 	a>>1;
 	a+=carry;
 	a&=0xFF;
@@ -603,7 +603,7 @@ var rra = function(){
 	resetHalfFlag();
 	resetSubFlag();
 	m=1;
-	t=4
+	t=4;
 }
 
 
@@ -947,7 +947,6 @@ var ccf = function(){
 	m=1;
 	t=4;
 }
-
 
 //0x40
 var ld_b_b= function(){
@@ -2698,6 +2697,658 @@ var rst_38 =  function(){
 	pc=0x0038
 	m=1;
 	t=16;
+}
+
+//---------------------//
+//-2 byte Instructions-//
+//---------------------//
+
+//0x00
+var rlc_b = function(){
+	var carrybit= (b>>7)&0x01;
+	if (carrybit===1){setCarryFlag();} else {resetCarryFlag();}
+	b<<1;
+	b+=carrybit;
+	if (b===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2;
+	t=8;
+}
+
+//0x01
+var rlc_c = function(){
+	var carrybit= (c>>7)&0x01;
+	if (carrybit===1){setCarryFlag();} else {resetCarryFlag();}
+	c<<1;
+	c+=carrybit;
+	if (c===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2;
+	t=8;
+}
+
+//0x02
+var rlc_d = function(){
+	var carrybit= (d>>7)&0x01;
+	if (carrybit===1){setCarryFlag();} else {resetCarryFlag();}
+	d<<1;
+	d+=carrybit;
+	if (d===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2;
+	t=8;
+}
+
+//0x03
+var rlc_e = function(){
+	var carrybit= (e>>7)&0x01;
+	if (carrybit===1){setCarryFlag();} else {resetCarryFlag();}
+	e<<1;
+	e+=carrybit;
+	if (e===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2;
+	t=8;
+}
+
+//0x04
+var rlc_h = function(){
+	var carrybit= (h>>7)&0x01;
+	if (carrybit===1){setCarryFlag();} else {resetCarryFlag();}
+	h<<1;
+	h+=carrybit;
+	if (h===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2;
+	t=8;
+}
+
+//0x05
+var rlc_l = function(){
+	var carrybit= (l>>7)&0x01;
+	if (carrybit===1){setCarryFlag();} else {resetCarryFlag();}
+	l<<1;
+	l+=carrybit;
+	if (l===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2;
+	t=8;
+}
+
+//0x06
+var rlc_hl = function(){
+	var value=memory.readByte(getAddr(h,l));
+	var carrybit= (value>>7)&0x01;
+	if (carrybit===1){setCarryFlag();} else {resetCarryFlag();}
+	value<<1;
+	value+=carrybit;
+	memory.writeByte(value,getAddr(h,l));
+	if (value===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2;
+	t=8;
+}
+
+//0x07
+var rlc_a = function(){
+	var carrybit= (a>>7)&0x01;
+	if (carrybit===1){setCarryFlag();} else {resetCarryFlag();}
+	a<<1;
+	a+=carrybit;
+	if (a===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2;
+	t=8;
+}
+
+//0x08
+var rrc_b = function(){
+	var carrybit = (b<<7)&0x80;
+	if (carrybit){setCarryFlag();} else {resetCarryFlag();}
+	b>>1;
+	b+=carrybit;
+	if(b===0){setZeroFlag();} else {resetZeroFlag();}
+	resetSubFlag();
+	resetHalfFlag();
+	m=2;
+	t=8;
+}		
+
+//0x09
+var rrc_c = function(){
+	var carrybit = (c<<7)&0x80;
+	if (carrybit){setCarryFlag();} else {resetCarryFlag();}
+	c>>1;
+	c+=carrybit;
+	if(c===0){setZeroFlag();} else {resetZeroFlag();}
+	resetSubFlag();
+	resetHalfFlag();
+	m=2;
+	t=8;
+}		
+
+//0x0A
+var rrc_d = function(){
+	var carrybit = (d<<7)&0x80;
+	if (carrybit){setCarryFlag();} else {resetCarryFlag();}
+	d>>1;
+	d+=carrybit;
+	if(d===0){setZeroFlag();} else {resetZeroFlag();}
+	resetSubFlag();
+	resetHalfFlag();
+	m=2;
+	t=8;
+}	
+
+//0x0B	
+var rrc_e = function(){
+	var carrybit = (e<<7)&0x80;
+	if (carrybit){setCarryFlag();} else {resetCarryFlag();}
+	e>>1;
+	e+=carrybit;
+	if(e===0){setZeroFlag();} else {resetZeroFlag();}
+	resetSubFlag();
+	resetHalfFlag();
+	m=2;
+	t=8;
+}		
+
+
+//0x0C
+var rrc_h = function(){
+	var carrybit = (h<<7)&0x80;
+	if (carrybit){setCarryFlag();} else {resetCarryFlag();}
+	h>>1;
+	h+=carrybit;
+	if(h===0){setZeroFlag();} else {resetZeroFlag();}
+	resetSubFlag();
+	resetHalfFlag();
+	m=2;
+	t=8;
+}		
+
+//0x0D
+var rrc_l = function(){
+	var carrybit = (l<<7)&0x80;
+	if (carrybit){setCarryFlag();} else {resetCarryFlag();}
+	l>>1;
+	l+=carrybit;
+	if(l===0){setZeroFlag();} else {resetZeroFlag();}
+	resetSubFlag();
+	resetHalfFlag();
+	m=2;
+	t=8;
+}		
+
+//0x0E
+var rrc_hl = function(){
+	var value=memory.readByte(getAddr(h,l));
+	var carrybit = (value<<7)&0x80;
+	if (carrybit){setCarryFlag();} else {resetCarryFlag();}
+	value>>1;
+	value+=carrybit;
+	memory.writeByte(value, getAddr(h,l));
+	if(b===0){setZeroFlag();} else {resetZeroFlag();}
+	resetSubFlag();
+	resetHalfFlag();
+	m=2;
+	t=8;
+}		
+
+//0x0F
+var rrc_a = function(){
+	var carrybit = (a<<7)&0x80;
+	if (carrybit){setCarryFlag();} else {resetCarryFlag();}
+	a>>1;
+	a+=carrybit;
+	if(a===0){setZeroFlag();} else {resetZeroFlag();}
+	resetSubFlag();
+	resetHalfFlag();
+	m=2;
+	t=8;
+}		
+
+//0x10
+var rl_b = function(){
+	var carry = carryFlag()?1:0;
+	if (b&0x80===0x80){setCarryFlag();} else {resetCarryFlag();}
+	b<<1;
+	b+=carry;
+	b&=0xFF;
+	if(b===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2;
+	t=8;
+}
+
+//0x11
+var rl_c = function(){
+	var carry = carryFlag()?1:0;
+	if (c&0x80===0x80){setCarryFlag();} else {resetCarryFlag();}
+	c<<1;
+	c+=carry;
+	c&=0xFF;
+	if(c===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2;
+	t=8;
+}
+
+//0x12
+var rl_d = function(){
+	var carry = carryFlag()?1:0;
+	if (d&0x80===0x80){setCarryFlag();} else {resetCarryFlag();}
+	d<<1;
+	d+=carry;
+	d&=0xFF;
+	if(d===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2;
+	t=8;
+}
+
+//0x13
+var rl_e = function(){
+	var carry = carryFlag()?1:0;
+	if (e&0x80===0x80){setCarryFlag();} else {resetCarryFlag();}
+	e<<1;
+	e+=carry;
+	e&=0xFF;
+	if(e===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2;
+	t=8;
+}
+
+//0x14
+var rl_h = function(){
+	var carry = carryFlag()?1:0;
+	if (h&0x80===0x80){setCarryFlag();} else {resetCarryFlag();}
+	h<<1;
+	h+=carry;
+	h&=0xFF;
+	if(h===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2;
+	t=8;
+}
+
+//0x15
+var rl_l = function(){
+	var carry = carryFlag()?1:0;
+	if (l&0x80===0x80){setCarryFlag();} else {resetCarryFlag();}
+	l<<1;
+	l+=carry;
+	l&=0xFF;
+	if(l===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2;
+	t=8;
+}
+
+//0x16
+var rl_hl = function(){
+	var value=memory.readByte(getAddr(h,l));
+	var carry = carryFlag()?1:0;
+	if (value&0x80===0x80){setCarryFlag();} else {resetCarryFlag();}
+	value<<1;
+	value+=carry;
+	value&=0xFF;
+	memory.writeByte(value, getAddr(h,l));
+	if(value===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2;
+	t=8;
+}
+
+//0x17
+var rl_a = function(){
+	var carry = carryFlag()?1:0;
+	if (a&0x80===0x80){setCarryFlag();} else {resetCarryFlag();}
+	a<<1;
+	a+=carry;
+	a&=0xFF;
+	if(a===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2;
+	t=8;
+}
+
+//0x18
+var rr_b = function(){
+	var carry = carryFlag()?0x80:0;
+	if (b&0x01){setCarryFlag();} else {resetCarryFlag();}
+	b>>1;
+	b+=carry;
+	b&=0xFF;
+	if(a===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2;
+	t=8;
+}
+
+//0x19
+var rr_c = function(){
+	var carry = carryFlag()?0x80:0;
+	if (c&0x01){setCarryFlag();} else {resetCarryFlag();}
+	c>>1;
+	c+=carry;
+	c&=0xFF;
+	if(c===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2;
+	t=8;
+}
+
+}
+
+//0x1A
+var rr_d = function(){
+	var carry = carryFlag()?0x80:0;
+	if (d&0x01){setCarryFlag();} else {resetCarryFlag();}
+	d>>1;
+	d+=carry;
+	d&=0xFF;
+	if(d===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2;
+	t=8;
+}
+
+
+//0x1B
+var rr_e = function(){
+	var carry = carryFlag()?0x80:0;
+	if (c&0x01){setCarryFlag();} else {resetCarryFlag();}
+	e>>1;
+	e+=carry;
+	e&=0xFF;
+	if(e===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2;
+	t=8;
+}
+
+//0x1C
+var rr_h = function(){
+	var carry = carryFlag()?0x80:0;
+	if (h&0x01){setCarryFlag();} else {resetCarryFlag();}
+	h>>1;
+	c+=carry;
+	c&=0xFF;
+	if(c===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2;
+	t=8;
+}
+
+//0x1D
+var rr_l = function(){
+	var carry = carryFlag()?0x80:0;
+	if (l&0x01){setCarryFlag();} else {resetCarryFlag();}
+	l>>1;
+	l+=carry;
+	l&=0xFF;
+	if(l===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2;
+	t=8;
+}
+
+//0x1E
+var rr_hl = function(){
+	var value=memory.readByte(getAddr(h,l));
+	var carry = carryFlag()?0x80:0;
+	if (value&0x01){setCarryFlag();} else {resetCarryFlag();}
+	value>>1;
+	value+=carry;
+	value&=0xFF;
+	memory.writeByte(value, getAddr(h,l));
+	if(l===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2;
+	t=8;
+}
+
+//0x1F
+var rr_a = function(){
+	var carry = carryFlag()?0x80:0;
+	if (a&0x01){setCarryFlag();} else {resetCarryFlag();}
+	a>>1;
+	a+=carry;
+	a&=0xFF;
+	if(a===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2;
+	t=8;
+}
+
+//0x20
+var sla_b = function(){
+	if(b&0x80){setCarryBit();} else {resetCarryBit();}
+	b<<1;
+	b&=0xFF;
+	if(b===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2;
+	t=8;
+}
+
+//0x21
+var sla_c = function(){
+	if(c&0x80){setCarryBit();} else {resetCarryBit();}
+	c<<1;
+	c&=0xFF;
+	if(c===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2;
+	t=8;
+}
+
+//0x22
+var sla_d = function(){
+	if(d&0x80){setCarryBit();} else {resetCarryBit();}
+	d<<1;
+	d&=0xFF;
+	if(d===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2;
+	t=8;
+}
+
+//0x23
+var sla_e = function(){
+	if(e&0x80){setCarryBit();} else {resetCarryBit();}
+	e<<1;
+	e&=0xFF;
+	if(e===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2;
+	t=8;
+}
+
+//0x24
+var sla_h = function(){
+	if(e&0x80){setCarryBit();} else {resetCarryBit();}
+	h<<1;
+	h&=0xFF;
+	if(h===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2;
+	t=8;
+}
+
+//0x25
+var sla_l = function(){
+	if(h&0x80){setCarryBit();} else {resetCarryBit();}
+	l<<1;
+	l&=0xFF;
+	if(l===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2;
+	t=8;
+}
+
+//0x26
+var sla_hl = function(){
+	var value=memory.readByte(getAddr(h,l));
+	if(value&0x80){setCarryBit();} else {resetCarryBit();}
+	value<<1;
+	value&=0xFF;
+	memory.writeByte(value, getAddr(h,l));
+	if(value===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2;
+	t=8;
+}
+
+//0x27
+var sla_a = function(){
+	if(a&0x80){setCarryFlag();} else {resetCarryFlag();}
+	a<<1;
+	a&=0xFF;
+	if(a===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2;
+	t=8;
+}
+
+//0x28
+var sra_b =function(){
+	if (b&0x01){setCarryFlag();} else {resetCarryFlag();}
+	var msb=(b&0x80);
+	b>>1;
+	b|=msb;
+	if(b===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2;
+	t=8;
+}
+
+//0x29
+var sra_c =function(){
+	if (c&0x01){setCarryFlag();} else {resetCarryFlag();}
+	var msb=(c&0x80);
+	c>>1;
+	c|=msb;
+	if(c===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2;
+	t=8;
+}
+
+//0x2A
+var sra_d =function(){
+	if (d&0x01){setCarryFlag();} else {resetCarryFlag();}
+	var msb=(d&0x80);
+	d>>1;
+	d|=msb;
+	if(d===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2;
+	t=8;
+}
+
+//0x2B
+var sra_e =function(){
+	if (e&0x01){setCarryFlag();} else {resetCarryFlag();}
+	var msb=(e&0x80);
+	e>>1;
+	e|=msb;
+	if(e===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2;
+	t=8;
+}
+
+//0x2C
+var sra_h =function(){
+	if (h&0x01){setCarryFlag();} else {resetCarryFlag();}
+	var msb=(h&0x80);
+	h>>1;
+	h|=msb;
+	if(h===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2;
+	t=8;
+}
+
+//0x2D
+var sra_l =function(){
+	if (l&0x01){setCarryFlag();} else {resetCarryFlag();}
+	var msb=(l&0x80);
+	l>>1;
+	l|=msb;
+	if(l===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2;
+	t=8;
+}
+
+//0x2E
+var sra_hl =function(){
+	var value=memory.readByte(getAddr(h,l));
+	if (value&0x01){setCarryFlag();} else {resetCarryFlag();}
+	var msb=(value&0x80);
+	value>>1;
+	value|=msb;
+	memory.writeByte(value, getAddr(h,l));
+	if(value===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2;
+	t=8;
+}
+
+//0x2F
+var sra_a =function(){
+	if (a&0x01){setCarryFlag();} else {resetCarryFlag();}
+	var msb=(a&0x80);
+	a>>1;
+	a|=msb;
+	if(a===0){setZeroFlag();} else {resetZeroFlag();}
+	resetHalfFlag();
+	resetSubFlag();
+	m=2;
+	t=8;
 }
 
 
