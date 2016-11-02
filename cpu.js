@@ -24,7 +24,8 @@ var t;
 var i;
 
 //instruction arrays
-var oneByteInstructions = [nop(), //0x00
+var oneByteInstructions = [
+    nop, //0x00
 	ld_bc,
 	ld_bc_a,
 	inc_bc,
@@ -129,7 +130,7 @@ var oneByteInstructions = [nop(), //0x00
 	ld_h_l,
 	ld_h_hl,
 	ld_h_a,
-	ld_l_b,b<<8 + c
+	ld_l_b,
 	ld_l_c,
 	ld_l_d,
 	ld_l_e,
@@ -158,6 +159,7 @@ var oneByteInstructions = [nop(), //0x00
 	add_a_d,
 	add_a_e,
 	add_a_h,
+	res_7_a,
 	add_a_l,
 	add_a_hl,
 	add_a_a,
@@ -283,6 +285,262 @@ var oneByteInstructions = [nop(), //0x00
 	rst_38,]
 	
 var twoByteInstructions = [
+	rlc_b,		//0x00
+	rlc_c,
+	rlc_d,
+	rlc_e,
+	rlc_h,
+	rlc_l,
+	rlc_hl,
+	rlc_a,
+	rrc_b,		
+	rrc_c,
+	rrc_d,
+	rrc_e,
+	rrc_h,
+	rrc_l,
+	rrc_hl,
+	rrc_a,
+	rl_b,		//0x10
+	rl_c,
+	rl_d,
+	rl_e,
+	rl_h,
+	rl_l,
+	rl_hl,
+	rl_a,
+	rr_b,		
+	rr_c,
+	rr_d,
+	rr_e,
+	rr_h,
+	rr_l,
+	rr_hl,
+	rr_a,
+	sla_b,		//0x20
+	sla_c,
+	sla_d,
+	sla_e,
+	sla_h,
+	sla_l,
+	sla_hl,
+	sla_a,
+	sra_b,		
+	sra_c,
+	sra_d,
+	sra_e,
+	sra_h,
+	sra_l,
+	sra_hl,
+	sra_a,
+	swap_b,		//0x30
+	swap_c,
+	swap_d,
+	swap_e,
+	swap_h,
+	swap_l,
+	swap_hl,
+	swap_a,
+	srl_b,		
+	srl_c,
+	srl_d,
+	srl_e,
+	srl_h,
+	srl_l,
+	srl_hl,
+	srl_a,
+	bit_0_b,		//0x40
+	bit_0_c,
+	bit_0_d,
+	bit_0_e,
+	bit_0_h,
+	bit_0_l,
+	bit_0_hl,
+	bit_0_a,
+	bit_1_b,		
+	bit_1_c,
+	bit_1_d,
+	bit_1_e,
+	bit_1_h,
+	bit_1_l,
+	bit_1_hl,
+	bit_1_a,
+	bit_2_b,		//0x50
+	bit_2_c,
+	bit_2_d,
+	bit_2_e,
+	bit_2_h,
+	bit_2_l,
+	bit_2_hl,
+	bit_2_a,
+	bit_3_b,		
+	bit_3_c,
+	bit_3_d,
+	bit_3_e,
+	bit_3_h,
+	bit_3_l,
+	bit_3_hl,
+	bit_3_a,
+	bit_4_b,		//0x60
+	bit_4_c,
+	bit_4_d,
+	bit_4_e,
+	bit_4_h,
+	bit_4_l,
+	bit_4_hl,
+	bit_4_a,
+	bit_5_b,		
+	bit_5_c,
+	bit_5_d,
+	bit_5_e,
+	bit_5_h,
+	bit_5_l,
+	bit_5_hl,
+	bit_5_a,
+	bit_6_b,		//0x70
+	bit_6_c,
+	bit_6_d,
+	bit_6_e,
+	bit_6_h,
+	bit_6_l,
+	bit_6_hl,
+	bit_6_a,
+	bit_7_b,		
+	bit_7_c,
+	bit_7_d,
+	bit_7_e,
+	bit_7_h,
+	bit_7_l,
+	bit_7_hl,
+	bit_7_a,
+	res_0_b,		//0x80
+	res_0_c,
+	res_0_d,
+	res_0_e,
+	res_0_h,
+	res_0_l,
+	res_0_hl,
+	res_0_a,
+	res_1_b,		
+	res_1_c,
+	res_1_d,
+	res_1_e,
+	res_1_h,
+	res_1_l,
+	res_1_hl,
+	res_1_a,
+	res_2_b,		//0x90
+	res_2_c,
+	res_2_d,
+	res_2_e,
+	res_2_h,
+	res_2_l,
+	res_2_hl,
+	res_2_a,
+	res_3_b,		
+	res_3_c,
+	res_3_d,
+	res_3_e,
+	res_3_h,
+	res_3_l,
+	res_3_hl,
+	res_3_a,
+	res_4_b,		//0xA0
+	res_4_c,
+	res_4_d,
+	res_4_e,
+	res_4_h,
+	res_4_l,
+	res_4_hl,
+	res_4_a,
+	res_5_b,		
+	res_5_c,
+	res_5_d,
+	res_5_e,
+	res_5_h,
+	res_5_l,
+	res_5_hl,
+	res_5_a,
+	res_6_b,		//0xB0
+	res_6_c,
+	res_6_d,
+	res_6_e,
+	res_6_h,
+	res_6_l,
+	res_6_hl,
+	res_6_a,
+	res_7_b,		
+	res_7_c,
+	res_7_d,
+	res_7_e,
+	res_7_h,
+	res_7_l,
+	res_7_hl,
+	res_7_a,
+	set_0_b,		//0xC0
+	set_0_c,
+	set_0_d,
+	set_0_e,
+	set_0_h,
+	set_0_l,
+	set_0_hl,
+	set_0_a,
+	set_1_b,		
+	set_1_c,
+	set_1_d,
+	set_1_e,
+	set_1_h,
+	set_1_l,
+	set_1_hl,
+	set_1_a,
+	set_2_b,		//0xD0
+	set_2_c,
+	set_2_d,
+	set_2_e,
+	set_2_h,
+	set_2_l,
+	set_2_hl,
+	set_2_a,
+	set_3_b,		
+	set_3_c,
+	set_3_d,
+	set_3_e,
+	set_3_h,
+	set_3_l,
+	set_3_hl,
+	set_3_a,
+	set_4_b,		//0xE0
+	set_4_c,
+	set_4_d,
+	set_4_e,
+	set_4_h,
+	set_4_l,
+	set_4_hl,
+	set_4_a,
+	set_5_b,		
+	set_5_c,
+	set_5_d,
+	set_5_e,
+	set_5_h,
+	set_5_l,
+	set_5_hl,
+	set_5_a,
+	set_6_b,		//0xF0
+	set_6_c,
+	set_6_d,
+	set_6_e,
+	set_6_h,
+	set_6_l,
+	set_6_hl,
+	set_6_a,
+	set_7_b,		
+	set_7_c,
+	set_7_d,
+	set_7_e,
+	set_7_h,
+	set_7_l,
+	set_7_hl,
+	set_7_a,
 ]
 
 //instructions
@@ -450,14 +708,14 @@ var ld_de_nn = function(){
 	d=memory.readByte(pc);
 	e=memory.readByte(pc+1);
 	m=3; t=12;
-};
+}
 
 //0x12
 var ld_de_a = function(){
 	var addr = getAddr(d,e);
 	memory.writeByte(addr, a);
 	m=1; t=8;
-};
+}
 
 //0x13
 var inc_de = function(){
@@ -602,7 +860,7 @@ var ld_hl_nn = function() {
 	h=memory.readByte(pc+1);
 	l=memory.readByte(pc+2);
 	m=1; t=8;
-};
+}
 
 //0x22
 var ldi_hl_a = function() {
@@ -618,7 +876,7 @@ var ldi_hl_a = function() {
 }
 
 //0x23
-var inc_hl = function() 
+var inc_hl = function(){
 	l++;
 	l&=0xFF
 	if(l===0){
@@ -2009,6 +2267,7 @@ var call_nz_nn = function(){
 	t=24;
 	}else{
 	t=12;
+	}
 }
 
 //0xC5
@@ -2089,6 +2348,7 @@ var call_z_nn = function(){
 	}else{
 	t=12;
 	m=3;
+	}
 }
 
 //0xCD
@@ -2099,7 +2359,7 @@ var call_nn = function(){
 }
 
 //0xCE
-var adc_a_n = function
+var adc_a_n = function(){
 	var value=memory.readByte(pc+1);
 	var result= a+value;
 	if(CarryFlag()){result+=1;}
@@ -2132,7 +2392,7 @@ var ret_nc = function(){
 }
 
 //0xD1
-var pop_de = function{
+var pop_de = function(){
 	e=memory.readByte(sp+1);
 	d=memory.readByte(sp+2);
 	sp+=2;
@@ -2163,6 +2423,7 @@ ar call_nc_nn = function(){
 	t=24; m=0;
 	}else{
 	t=12; m=3;
+	}
 }
 
 //0xD5
@@ -2204,6 +2465,7 @@ var ret_c = function(){
 	t=20; m=0;
 	} else {
 	t=8; m=1;
+	}
 }
 
 //0xD9
@@ -2238,6 +2500,7 @@ var call_c_nn = function(){
 	t=24; m=0;
 	}else{
 	t=12; m=3;
+	}
 }
 
 //0xDD
@@ -2334,7 +2597,7 @@ var jp_hl = function(){
 }
 
 //0xEA
-var ld_nn_a = function();
+var ld_nn_a = function(){
 	writeByte(a, readWord(pc+1));
 	m=3; t=16;
 }
@@ -2444,7 +2707,7 @@ var ei= function(){
 }
 
 //0xFE
-var cp_n = function 
+var cp_n = function(){
 	var value=memory.readByte(pc+1);
 	var result= a-value;
 	if (result < 0){setCarryFlag();}
@@ -4597,8 +4860,6 @@ var res_7_a = function(){
 	m=2; t=8;
 }
 
-
-
 //------------------//
 //-helper functions-//
 //------------------//
@@ -4662,3 +4923,11 @@ var getAddr = function(a,b){ //finds and returns combined address of two 8bit re
 	addr+=b;
 	return addr;
 }
+
+var ex = function(opcode){
+	oneByteInstructions[opcode]();
+	pc+=m;
+}
+
+};
+	
