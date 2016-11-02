@@ -24,7 +24,7 @@ var t;
 var i;
 
 //instruction arrays
-var oneByteInstructions = [
+var oneByteInstructions: [
     nop, //0x00
 	ld_bc,
 	ld_bc_a,
@@ -284,7 +284,7 @@ var oneByteInstructions = [
 	cp_n,
 	rst_38,]
 	
-var twoByteInstructions = [
+var twoByteInstructions: [
 	rlc_b,		//0x00
 	rlc_c,
 	rlc_d,
@@ -540,8 +540,7 @@ var twoByteInstructions = [
 	set_7_h,
 	set_7_l,
 	set_7_hl,
-	set_7_a,
-]
+	set_7_a,]
 
 //instructions
 
