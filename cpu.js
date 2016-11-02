@@ -1083,6 +1083,7 @@ ar jr_nc_n = function(){
 	}
 }
 
+
 //0x39
 var add_hl_sp = function(){
 	var x = h<<8 + l;
@@ -3458,7 +3459,7 @@ var swap_a = function(){
 }
 
 //0x38
-var srl_b = function();
+var srl_b = function(){
 	if (b&0x01){setCarryFlag();} else {resetCarryFlag();}
 	b>>1;
 	if (b===0){setZeroFlag();} else {resetZeroFlag();}
@@ -3468,7 +3469,7 @@ var srl_b = function();
 }
 
 //0x39
-var srl_c = function();
+var srl_c = function(){
 	if (c&0x01){setCarryFlag();} else {resetCarryFlag();}
 	c>>1;
 	if (c===0){setZeroFlag();} else {resetZeroFlag();}
@@ -3478,7 +3479,7 @@ var srl_c = function();
 }
 
 //0x3A
-var srl_d = function();
+var srl_d = function(){
 	if (d&0x01){setCarryFlag();} else {resetCarryFlag();}
 	d>>1;
 	if (d===0){setZeroFlag();} else {resetZeroFlag();}
@@ -3488,7 +3489,7 @@ var srl_d = function();
 }
 
 //0x3B
-var srl_e = function();
+var srl_e = function(){
 	if (e&0x01){setCarryFlag();} else {resetCarryFlag();}
 	e>>1;
 	if (e===0){setZeroFlag();} else {resetZeroFlag();}
@@ -3498,7 +3499,7 @@ var srl_e = function();
 }
 
 //0x3C
-var srl_h = function();
+var srl_h = function(){
 	if (h&0x01){setCarryFlag();} else {resetCarryFlag();}
 	h>>1;
 	if (h===0){setZeroFlag();} else {resetZeroFlag();}
@@ -3508,7 +3509,7 @@ var srl_h = function();
 }
 
 //0x3D
-var srl_l = function();
+var srl_l = function(){
 	if (l&0x01){setCarryFlag();} else {resetCarryFlag();}
 	l>>1;
 	if (l===0){setZeroFlag();} else {resetZeroFlag();}
@@ -3518,7 +3519,7 @@ var srl_l = function();
 }
 
 //0x3E
-var srl_hl = function();
+var srl_hl = function(){
 	var value=memory.readByte(pc+1);
 	if (value&0x01){setCarryFlag();} else {resetCarryFlag();}
 	value>>1;
@@ -3530,7 +3531,7 @@ var srl_hl = function();
 }
 
 //0x3F
-var srl_a = function();
+var srl_a = function(){
 	if (a&0x01){setCarryFlag();} else {resetCarryFlag();}
 	a>>1;
 	if (a===0){setZeroFlag();} else {resetZeroFlag();}
@@ -4930,4 +4931,3 @@ var ex = function(opcode){
 }
 
 };
-	
