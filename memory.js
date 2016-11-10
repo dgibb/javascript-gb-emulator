@@ -27,28 +27,27 @@ MEMORY=[];
 
 //functions
 
-var readByte = function(addr){
-	var data = MEMORY[addr];
-	return data;
-}
+readByte: = function(addr){
+	return memory.MEMORY[addr];
+},
 	
-var readWord(addr){
-	var data = MEMORY[addr];
+readWord: function(addr){
+	var data = memory.MEMORY[addr];
 	data <<8;
 	data += MEMORY[addr+1];
 	return data;
-}
+},
 	
-var writeByte = function (data, addr){
-	MEMORY[addr]=data;
-}
+writeByte: function(data, addr){
+	memory.MEMORY[addr]=data;
+},
 	
-var writeWord(data, addr){
+writeWord: function(data, addr){
 	var data2= data&0xFF;
 	data>>8;
-	MEMORY[addr]=data;
-	MEMORY[addr+1]=data2;	
-}
+	memory.MEMORY[addr]=data;
+	memory.MEMORY[addr+1]=data2;	
+},
 
 };
 		
