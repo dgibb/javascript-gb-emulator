@@ -130,7 +130,7 @@ cpu.t=4
 
 //0x0B
  dec_bc : function(){
-	var x= getAddr(cpu.b,cpu.c);
+	var x= cpu.getAddr(cpu.b,cpu.c);
 	x--;
 	cpu.b=x>>8;
 	cpu.c=x&0x00FF;
@@ -183,7 +183,7 @@ cpu.t=4
 
 //0x11
  ld_de_nn : function(){
-	cpu.d=memory.readByte(cpu.pc);
+	cpu.d=memory.readByte(cpu.pc+2);
 	cpu.e=memory.readByte(cpu.pc+1);
 	cpu.m=3; cpu.t=12;
 },
@@ -234,8 +234,8 @@ cpu.t=4
 
 //0x17
  rla : function(){
-	var carry = carryFlag()?1:0;
-	if (a&0x80===0x80){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
+	var carry = cpu.carryFlag()?1:0;
+	if (cpu.a&0x80===0x80){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
 	cpu.a<<1;
 	cpu.a+=carry;
 	cpu.a&=0xFF;
@@ -247,9 +247,8 @@ cpu.t=4
 
 //0x18
  jr_n : function(){
-	var jump =readByte(cpu.pc+1);
-	cpu.pc+=jump;
-	cpu.m=0;
+	cpu.pc+=cpu.signDecode(memory.readByte(cpu.pc+1));
+	cpu.m=2;
 	cpu.t=12;
 },
 
@@ -309,8 +308,8 @@ cpu.t=4
 
 //0x1F
  rra : function(){
-	var carry = carryFlag()?0x80:0;
-	if (a&0x01){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
+	var carry = cpu.carryFlag()?0x80:0;
+	if (cpu.a&0x01){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
 	cpu.a=cpu.a>>1;
 	cpu.a+=carry;
 	cpu.a&=0xFF;
@@ -324,28 +323,28 @@ cpu.t=4
 //0x20
  jr_nz_n : function() {
 	if (!cpu.zeroFlag()){
-		cpu.pc+=memory.readByte(cpu.pc+1);
-		cpu.t=12; cpu.m=0;
+		cpu.pc+= cpu.signDecode(memory.readByte(cpu.pc+1));
+		cpu.t=12; cpu.m=2;
 		}
 	else{
-		cpu.m=0; cpu.t=8;
+		cpu.m=2; cpu.t=8;
 		}
 },
 
 //0x21
  ld_hl_nn : function() {
-	cpu.h=memory.readByte(cpu.pc+1);
-	cpu.l=memory.readByte(cpu.pc+2);
+	cpu.h=memory.readByte(cpu.pc+2);
+	cpu.l=memory.readByte(cpu.pc+1);
 	cpu.m=3; cpu.t=8;
 },
 
 //0x22
  ldi_hl_a : function() {
 	var addr = cpu.getAddr(cpu.h,cpu.l);
-	memory.writeByte(addr, cpu.a);
+	memory.writeByte(cpu.a, addr);
 	cpu.l++;
-	if(cpu.l>255){
-		cpu.l&=0x00FF;
+	cpu.l&=0xFF;
+	if(cpu.l===0){
 		cpu.h++;
 		cpu.h&=0xFF;
 	}
@@ -401,7 +400,7 @@ cpu.t=4
 //0x28
  jr_z_n : function(){
 	if (cpu.zeroFlag()){
-		cpu.cpu.pc+=memory.readByte(cpu.pc+1);
+		cpu.cpu.pc+=cpu.signDecode(memory.readByte(cpu.pc+1));
 		cpu.t=12; cpu.m=0;
 		}
 	else{
@@ -479,7 +478,7 @@ cpu.t=4
 //0x30
  jr_nc_n : function(){
 	if (!cpu.carryFlag()){
-		cpu.pc+=readByte(cpu.pc+1);
+		cpu.pc+=cpu.signDecode(memory.readByte(cpu.pc+1));
 		cpu.t=12; cpu.m=0;
 		}
 	else{
@@ -497,11 +496,11 @@ cpu.t=4
  ldd_hl_a : function(){
 	var addr = cpu.getAddr(cpu.h,cpu.l);
 	memory.writeByte(cpu.a, addr);
-	cpu.l--;
-	if(cpu.l===255){
-		cpu.h--;
-	}
-	cpu.m=2; cpu.t=8;
+	var data = cpu.getAddr(cpu.h,cpu.l);
+	data--;
+	cpu.l = data&0xFF;
+	cpu.h=(data>>8)&0xFF;
+	cpu.m=1; cpu.t=8;
 },
 
 //0x33
@@ -512,7 +511,7 @@ cpu.t=4
 
 //0x34
  inc_hl_ : function(){
-	 data = memory.readByte(cpu.getAddr(cpu.h,cpu.l));
+	var data = memory.readByte(cpu.getAddr(cpu.h,cpu.l));
 	datcpu.a++;
 	memory.writeByte(data, addr);
 	if (datcpu.a===0){cpu.setZeroFlag();}else{cpu.resetZeroFlag();}
@@ -549,7 +548,7 @@ cpu.t=4
 //0x38
 jr_c_n : function(){
 	if (cpu.carryFlag()){
-		cpu.pc+=readByte(cpu.pc+1);
+		cpu.pc+=cpu.signDecode(memory.readByte(cpu.pc+1));
 		cpu.t=12; cpu.m=0;
 		}
 	else{
@@ -950,7 +949,7 @@ jr_c_n : function(){
 
 //0x77
  ld_hl_a: function(){
-	memory.writeByte(cpu.getAddr(hl),a);
+	memory.writeByte(cpu.a, cpu.getAddr(cpu.h,cpu.l));
 	cpu.m=1; cpu.t=4;
 },
 
@@ -1003,7 +1002,7 @@ jr_c_n : function(){
 },
 
 //0x80
- add_b_a : function(){
+ add_a_b : function(){
 	var result = cpu.a+cpu.b;
 	if (result > 255){cpu.setCarryFlag();}
 	if(((cpu.a&0x0F) + (cpu.b&0x0F))&0x10){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
@@ -1015,7 +1014,7 @@ jr_c_n : function(){
 },
 
 //0x81
-  add_c_a : function(){
+  add_a_c : function(){
 	var result =cpu.a+cpu.c;
 	if (result > 255){cpu.setCarryFlag();}
 	if(((cpu.a&0x0F) + (cpu.c&0x0F))&0x10){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
@@ -1027,7 +1026,7 @@ jr_c_n : function(){
 },
 
 //0x82
- add_d_a : function(){
+ add_a_d : function(){
 	var result = cpu.a+cpu.d;
 	if (result > 255){cpu.setCarryFlag();}
 	if(((cpu.a&0x0F) + (cpu.d&0x0F))&0x10){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
@@ -1038,7 +1037,7 @@ jr_c_n : function(){
 },
 	
 //0x83
- add_e_a : function(){
+ add_a_e : function(){
 	var result =cpu.a+cpu.e;
 	if (result & 0xff00){cpu.setCarryFlag();}
 	if(((cpu.a&0x0F) + (cpu.e&0x0F))&0x10){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
@@ -1049,7 +1048,7 @@ jr_c_n : function(){
 },
 
 //0x84
- add_h_a : function(){
+ add_a_h : function(){
 	 var result = cpu.a+cpu.h;
 	if (result > 255){cpu.setCarryFlag();}
 	if(((cpu.a&0x0F) + (cpu.h&0x0F))&0x10){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
@@ -1060,7 +1059,7 @@ jr_c_n : function(){
 },
 
 //0x85
- add_l_a : function(){
+ add_a_l : function(){
 	 var result = cpu.a+cpu.l;
 	if (result > 255){cpu.setCarryFlag();}
 	if(((cpu.a&0x0F) + (cpu.l&0x0F))&0x10){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
@@ -1072,7 +1071,7 @@ jr_c_n : function(){
 },
 
 //0x86
- add_hl_a : function(){
+ add_a_hl : function(){
 	var value = readByte(cpu.getAddr(cpu.h,cpu.l));
 	var result = cpu.a+value;
 	if (result & 0xff00){cpu.setCarryFlag();}
@@ -1260,9 +1259,10 @@ jr_c_n : function(){
 
 //0x96
  sub_hl_a : function(){
-	var result =cpu.a-memory.readByte(cpu.getAddr(cpu.h,cpu.l));
+	var value= memory.readByte(cpu.getAddr(cpu.h,cpu.l));
+	var result =cpu.a-value;
 	if (result < 0){cpu.setCarryFlag();}
-	if(a&0x0F < d&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
+	if(cpu.a&0x0F < value&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
 	if (result === 0){cpu.setZeroFlag();}else{cpu.resetZeroFlag();}
 	cpu.cpu.a=(result&0x00ff);
 	cpu.setSubFlag();
@@ -1273,7 +1273,7 @@ jr_c_n : function(){
  sub_a_a : function(){
 	var result =cpu.a-cpu.a;
 	if (result < 0){cpu.setCarryFlag();}
-	if(a&0x0F < d&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
+	if(cpu.a&0x0F < cpu.a&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
 	if (result === 0){cpu.setZeroFlag();}else{cpu.resetZeroFlag();}
 	cpu.a=(result&0x00ff);
 	cpu.setSubFlag();
@@ -1285,7 +1285,7 @@ jr_c_n : function(){
 	var result =cpu.a-cpu.b;
 	if(cpu.carryFlag()){result-=1;}
 	if (result < 0){cpu.setCarryFlag();}
-	if(a&0x0F < d&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
+	if(cpu.a&0x0F < cpu.b&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
 	if (result === 0){cpu.setZeroFlag();}else{cpu.resetZeroFlag();}
 	cpu.a=(result&0x00ff);
 	cpu.setSubFlag();
@@ -1297,7 +1297,7 @@ jr_c_n : function(){
 	var result =cpu.a-cpu.c;
 	if(cpu.carryFlag()){result-=1;}
 	if (result < 0){cpu.setCarryFlag();}
-	if(a&0x0F < d&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
+	if(cpu.a&0x0F < cpu.c&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
 	if (result === 0){cpu.setZeroFlag();}else{cpu.resetZeroFlag();}
 	cpu.a=(result&0x00ff);
 	cpu.setSubFlag();
@@ -1309,7 +1309,7 @@ jr_c_n : function(){
 	var result =cpu.a-cpu.d;
 	if(cpu.carryFlag()){result-=1;}
 	if (result < 0){cpu.setCarryFlag();}
-	if(a&0x0F < d&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
+	if(cpu.a&0x0F < cpu.d&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
 	if (result === 0){cpu.setZeroFlag();}else{cpu.resetZeroFlag();}
 	cpu.a=(result&0x00ff);
 	cpu.setSubFlag();
@@ -1321,7 +1321,7 @@ jr_c_n : function(){
 	 var result =cpu.a-e;
 	if(cpu.carryFlag()){result-=1;}
 	if (result < 0){cpu.setCarryFlag();}
-	if(a&0x0F < d&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
+	if(cpu.a&0x0F < cpu.d&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
 	if (result === 0){cpu.setZeroFlag();}else{cpu.resetZeroFlag();}
 	cpu.a=(result&0x00ff);
 	cpu.setSubFlag();	
@@ -1330,10 +1330,10 @@ jr_c_n : function(){
 
 //0x9C
  sbc_h_a : function(){
-	 var result =cpu.a-h;
+	var result =cpu.a-cpu.h;
 	if(cpu.carryFlag()){result-=1;}
 	if (result < 0){cpu.setCarryFlag();}
-	if(a&0x0F < d&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
+	if(cpu.a&0x0F < cpu.d&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
 	if (result === 0){cpu.setZeroFlag();}else{cpu.resetZeroFlag();}
 	cpu.a=(result&0x00ff);
 	cpu.setSubFlag();
@@ -1342,10 +1342,10 @@ jr_c_n : function(){
 
 //0x9D
  sbc_l_a : function(){
-	 var result =cpu.a-l;
+	 var result =cpu.a-cpu.l;
 	if(cpu.carryFlag()){result-=1;}
 	if (result < 0){cpu.setCarryFlag();}
-	if(a&0x0F < d&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
+	if(cpu.a&0x0F < cpu.l&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
 	if (result === 0){cpu.setZeroFlag();}else{cpu.resetZeroFlag();}
 	cpu.a=(result&0x00ff);
 	cpu.setSubFlag();
@@ -1354,10 +1354,11 @@ jr_c_n : function(){
 
 //0x9E
  sbc_hl_a : function(){
-	 var result =cpu.a-memory.readByte(cpu.getAddr(cpu.h,cpu.l));
+	var value = memory.readByte(cpu.getAddr(cpu.h,cpu.l));
+	var result =cpu.a-value;
 	if(cpu.carryFlag()){result-=1;}
 	if (result < 0){cpu.setCarryFlag();}
-	if(a&0x0F < d&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
+	if(cpu.a&0x0F < value&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
 	if (result === 0){cpu.setZeroFlag();}else{cpu.resetZeroFlag();}
 	cpu.a=(result&0x00ff);
 	cpu.setSubFlag();
@@ -1366,10 +1367,10 @@ jr_c_n : function(){
 
 //0x9F
  sbc_a_a : function(){
-	 var result =cpu.a-a;
+	var result =cpu.a-cpu.a;
 	if(cpu.carryFlag()){result-=1;}
 	if (result < 0){cpu.setCarryFlag();}
-	if(a&0x0F < d&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
+	if(cpu.a&0x0F < cpu.a&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
 	if (result === 0){cpu.setZeroFlag();}else{cpu.resetZeroFlag();}
 	cpu.a=(result&0x00ff);
 	cpu.setSubFlag();
@@ -1618,18 +1619,18 @@ jr_c_n : function(){
 
 //0xB8
  cp_b : function(){
-	var result= a-b;
+	var result= cpu.a-cpu.b;
 	if (result < 0){cpu.setCarryFlag();}
-	if(a&0x0F < b&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
+	if(cpu.a&0x0F < b&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
 	if (result === 0){cpu.setZeroFlag();}else{cpu.resetZeroFlag();}
 	cpu.setSubFlag();
 	cpu.m=1; cpu.t=4;
 },
 //0xB9
  cp_c : function(){
-	var result= a-c;
+	var result= cpu.a-cpu.c;
 	if (result < 0){cpu.setCarryFlag();}
-	if(a&0x0F < c&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
+	if(cpu.a&0x0F < c&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
 	if (result === 0){cpu.setZeroFlag();}else{cpu.resetZeroFlag();}
 	cpu.setSubFlag();
 	cpu.m=1; cpu.t=4;
@@ -1637,9 +1638,9 @@ jr_c_n : function(){
 
 //0xBA
  cp_d : function(){
-	var result= a-d;
+	var result= cpu.a-cpu.d;
 	if (result < 0){cpu.setCarryFlag();}
-	if(a&0x0F < d&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
+	if(cpu.a&0x0F < d&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
 	if (result === 0){cpu.setZeroFlag();}else{cpu.resetZeroFlag();}
 	cpu.setSubFlag();
 	cpu.m=1; cpu.t=4;
@@ -1647,9 +1648,9 @@ jr_c_n : function(){
 
 //0xBB
  cp_e : function(){
-	 result= a-e;
+	 result= cpu.a-cpu.e;
 	if (result < 0){cpu.setCarryFlag();}
-	if(a&0x0F < e&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
+	if(cpu.a&0x0F < e&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
 	if (result === 0){cpu.setZeroFlag();}else{cpu.resetZeroFlag();}
 	cpu.setSubFlag();
 	cpu.m=1; cpu.t=4;
@@ -1657,9 +1658,9 @@ jr_c_n : function(){
 
 //0xBC
  cp_h : function(){
-	 result= a-h;
+	 result= cpu.a-cpu.h;
 	if (result < 0){cpu.setCarryFlag();}
-	if(a&0x0F < h&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
+	if(cpu.a&0x0F < h&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
 	if (result === 0){cpu.setZeroFlag();}else{cpu.resetZeroFlag();}
 	cpu.setSubFlag();
 	cpu.m=1; cpu.t=4;
@@ -1667,9 +1668,9 @@ jr_c_n : function(){
 
 //0xBD
  cp_l : function(){
-	 result= a-l;
+	 result= cpu.a-cpu.l;
 	if (result < 0){cpu.setCarryFlag();}
-	if(a&0x0F < l&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
+	if(cpu.a&0x0F < l&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
 	if (result === 0){cpu.setZeroFlag();}else{cpu.resetZeroFlag();}
 	cpu.setSubFlag();
 	cpu.m=1; cpu.t=4;
@@ -1678,9 +1679,9 @@ jr_c_n : function(){
 //0xBE
  cp_hl : function(){
 	var value=readbyte(cpu.getAddr(cpu.h,cpu.l));
-	var result= a-value;
+	var result= cpu.a-value;
 	if (result < 0){cpu.setCarryFlag();}
-	if(a&0x0F < value&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
+	if(cpu.a&0x0F < value&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
 	if (result === 0){cpu.setZeroFlag();}else{cpu.resetZeroFlag();}
 	cpu.setSubFlag();
 	cpu.m=1; cpu.t=4;
@@ -1688,9 +1689,9 @@ jr_c_n : function(){
 
 //0xBF
  cp_a : function(){
-	var result= a-a;
+	var result= cpu.a-cpu.a;
 	if (result < 0){cpu.setCarryFlag();}
-	if(a&0x0F < a&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
+	if(cpu.a&0x0F < a&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
 	if (result === 0){cpu.setZeroFlag();}else{cpu.resetZeroFlag();}
 	cpu.setSubFlag();
 	cpu.m=1; cpu.t=4;
@@ -1698,21 +1699,20 @@ jr_c_n : function(){
 
 //0xC0
  ret_nz : function(){
-	cpu.m=1;
 	if (!cpu.zeroFlag()){
-	cpu.pc=memory.readWord(sp);
-	cpu.t=20;
 	cpu.sp+=2;
+	cpu.pc=memory.readWord(cpu.sp);
+	cpu.t=20; cpu.m=0;
 	} else { 
-	cpu.t=8;
+	cpu.t=8; cpu.m=1;
 	}
 },
 
 //0xC1
  pop_bc : function(){
-	cpu.c=memory.readByte(cpu.sp+1);
-	cpu.b=memory.readByte(cpu.sp+2);
 	cpu.sp+=2;
+	cpu.c=memory.readByte(cpu.sp);
+	cpu.b=memory.readByte(cpu.sp+1);
 	cpu.m=1; cpu.t=12;
 },
 
@@ -1735,20 +1735,20 @@ jr_c_n : function(){
 
 //0xC4
  call_nz_nn : function(){
-	cpu.m=3;
 	if(!cpu.zeroFlag()){
-	memory.writeWord(cpu.pc+3,sp);
+	memory.writeWord(cpu.pc+3,cpu.sp);
+	cpu.sp-=2;
 	cpu.pc=memory.readWord(cpu.pc+1);
-	cpu.t=24;
+	cpu.t=24; cpu.m=0;
 	}else{
-	cpu.t=12;
+	cpu.t=12; cpu.m=3;
 	}
 },
 
 //0xC5
  push_bc : function(){
-	memory.writeByte(cpu.b, cpu.sp);
-	memory.writeByte(cpu.c,cpu.sp-1);
+	memory.writeByte(cpu.b, cpu.sp+1);
+	memory.writeByte(cpu.c,cpu.sp);
 	cpu.sp-=2;
 	cpu.m=1; cpu.t=16;
 },
@@ -1776,11 +1776,8 @@ jr_c_n : function(){
 //0xC8
  ret_z : function(){
 	if(cpu.zeroFlag()){
-    var addr=memory.readbyte(sp);
-	addr << 8;
-	addr+= readByte(cpu.sp+1);
-	cpu.sp+=2;
-	cpu.pc=cpu.addr;
+    cpu.sp+=2;
+	cpu.pc=memory.readWord(cpu.sp);
 	cpu.t=20; cpu.m=0;
 	}else{
 	cpu.t=8;
@@ -1790,12 +1787,9 @@ jr_c_n : function(){
 
 //0xC9
  ret : function(){
-	var addr=memory.readbyte(cpu.sp);
-	addr << 8;
-	addr|= readByte(cpu.sp+1);
 	cpu.sp+=2;
-	cpu.pc=cpu.addr;
-	cpu.m=1; cpu.t=16;
+	cpu.pc=memory.readWord(cpu.sp);
+	cpu.m=0; cpu.t=16;
 },
 
 //0xCA
@@ -1816,21 +1810,21 @@ jr_c_n : function(){
 //0xCC
  call_z_nn : function(){
 	if(cpu.zeroFlag()){
-	memory.writeWord(cpu.pc+3,sp);
+	memory.writeWord(cpu.pc+3, cpu.sp);
+	cpu.sp-=2;
 	cpu.pc=memory.readWord(cpu.pc+1);
-	cpu.t=24;
-	cpu.m=0;
+	cpu.t=24; cpu.m=0;
 	}else{
-	cpu.t=12;
-	cpu.m=3;
+	cpu.t=12; cpu.m=3;
 	}
 },
 
 //0xCD
- call_nn : function(){
+ call_nn: function(){
 	memory.writeWord(cpu.pc+3,cpu.sp);
+	cpu.sp-=2;
 	cpu.pc=memory.readWord(cpu.pc+1);
-	cpu.t=24; cpu.m=3;
+	cpu.t=24; cpu.m=0;
 },
 
 //0xCE
@@ -1857,9 +1851,9 @@ jr_c_n : function(){
 //0xD0
  ret_nc : function(){
 	if (!cpu.carryFlag()){
+	cpu.sp+=2;
 	cpu.pc=memory.readWord(cpu.sp);
 	cpu.m=0; cpu.t=20;
-	cpu.sp+=2;
 	}else{
 	cpu.t=8;
 	cpu.m=1;
@@ -1868,9 +1862,9 @@ jr_c_n : function(){
 
 //0xD1
  pop_de : function(){
-	cpu.e=memory.readByte(cpu.sp+1);
-	cpu.d=memory.readByte(cpu.sp+2);
 	cpu.sp+=2;
+	cpu.e=memory.readByte(cpu.sp);
+	cpu.d=memory.readByte(cpu.sp+1);
 	cpu.m=1; cpu.t=12;
 },
 
@@ -1894,6 +1888,7 @@ jr_c_n : function(){
 call_nc_nn : function(){
 	if(!cpu.carryFlag()){
 	memory.writeWord(cpu.pc+3,cpu.sp);
+	sp-=2;
 	cpu.pc=memory.readWord(cpu.pc+1);
 	cpu.t=24; cpu.m=0;
 	}else{
@@ -1903,8 +1898,8 @@ call_nc_nn : function(){
 
 //0xD5
  push_de : function(){
-	memory.writeByte(cpu.d, cpu.sp);
-	memory.writeByte(cpu.e,cpu.sp-1);
+	memory.writeByte(cpu.d, cpu.sp+1);
+	memory.writeByte(cpu.e,cpu.sp);
 	cpu.sp-=2;
 	cpu.m=1; cpu.t=16;
 },
@@ -1932,11 +1927,8 @@ call_nc_nn : function(){
 //0xD8
  ret_c : function(){
 	if(cpu.carryFlag()){
-    var addr=memory.readbyte(sp);
-	addr << 8;
-	addr+= readByte(cpu.sp+1);
-	cpu.sp+=2;
-	cpu.pc=cpu.addr;
+    cpu.sp+=2;
+	cpu.pc=memory.readWord(cpu.sp);
 	cpu.t=20; cpu.m=0;
 	}else{
 	cpu.t=8; cpu.m=1;
@@ -1946,11 +1938,8 @@ call_nc_nn : function(){
 //0xD9
  reti : function(){
 	cpu.i=true;
-	var addr=memory.readbyte(sp);
-	addr << 8;
-	addr+= readByte(cpu.sp+1);
 	cpu.sp+=2;
-	cpu.pc=cpu.addr;
+	cpu.pc=memory.readWord(cpu.sp);
 	cpu.m=1; cpu.t=16;
 },
 
@@ -1970,7 +1959,8 @@ call_nc_nn : function(){
 //0xDC
  call_c_nn : function(){
 	if(cpu.carryFlag()){
-	memory.writeWord(cpu.pc+3,sp);
+	memory.writeWord(cpu.pc+3, cpu.sp);
+	sp-=2;
 	cpu.pc=memory.readWord(cpu.pc+1);
 	cpu.t=24; cpu.m=0;
 	}else{
@@ -2004,16 +1994,16 @@ call_nc_nn : function(){
 
 //0xE0
  ldh_n_a : function(){
-	cpu.a=memory.readByte(cpu.pc+1);
-	cpu.m=2; cpu.t=8;
-	cpu.t=12;
+	var addr=0xFF00|memory.readByte(cpu.pc+1);
+	memory.writeByte(cpu.a, addr);
+	cpu.m=2; cpu.t=12;
 },
 	
 //0xE1
  pop_hl : function(){
-	cpu.l=memory.readByte(cpu.sp+1);
-	cpu.h=memory.readByte(cpu.sp+2);
 	cpu.sp+=2;
+	cpu.l=memory.readByte(cpu.sp);
+	cpu.h=memory.readByte(cpu.sp+1);
 	cpu.m=1; cpu.t=12;
 },
 
@@ -2021,7 +2011,7 @@ call_nc_nn : function(){
  ldh_c_a : function(){
 	var addr = 0xFF00 + cpu.c;
 	memory.writeByte(cpu.a, addr);
-	cpu.m=2; cpu.t=8;
+	cpu.m=1; cpu.t=8;
 },
 
 //0xE3, 0xE4
@@ -2029,8 +2019,8 @@ call_nc_nn : function(){
 
 //0xE5
  push_hl : function(){
-	memory.writeByte(cpu.h, cpu.sp);
-	memory.writeByte(cpu.l,cpu.sp-1);
+	memory.writeByte(cpu.h, cpu.sp+1);
+	memory.writeByte(cpu.l,cpu.sp);
 	cpu.sp-=2;
 	cpu.m=1; cpu.t=16;
 },
@@ -2060,8 +2050,8 @@ call_nc_nn : function(){
 	cpu.sp+=value;
 	cpu.resetZeroFlag();
 	cpu.resetSubFlag();
-	if(((sp&0x0F) + (value&0x0F))&0x10){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
-	if (sp>65535){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
+	if(((cpu.sp&0x0F) + (value&0x0F))&0x10){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
+	if (cpu.sp>65535){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
 	cpu.m=2; cpu.t=16;
 },
 
@@ -2073,7 +2063,7 @@ call_nc_nn : function(){
 
 //0xEA
  ld_nn_a : function(){
-	writeByte(a, readWord(cpu.pc+1));
+	memory.writeByte(cpu.a, memory.readWord(cpu.pc+1));
 	cpu.m=3; cpu.t=16;
 },
 
@@ -2105,15 +2095,15 @@ call_nc_nn : function(){
 
 //0xF1
  pop_af : function(){
-	cpu.f=memory.readByte(cpu.sp+1);
-	cpu.a=memory.readByte(cpu.sp+2);
 	cpu.sp+=2;
+	cpu.f=memory.readByte(cpu.sp);
+	cpu.a=memory.readByte(cpu.sp+1);
 	cpu.m=1; cpu.t=12;	
 },
 	
 //0xF2
  ld_a_c : function(){
-	var addr=0xFF00+cpu.c;
+	var addr=0xFF00|cpu.c;
 	cpu.a=memory.readByte(addr);
 	cpu.m=1; cpu.t=8;
 },
@@ -2126,8 +2116,8 @@ call_nc_nn : function(){
 
 //0xF5
  push_af : function(){
-	memory.writeByte(cpu.a, cpu.sp);
-	memory.writeByte(cpu.f,cpu.sp-1);
+	memory.writeByte(cpu.a, cpu.sp+1);
+	memory.writeByte(cpu.f,cpu.sp);
 	cpu.sp-=2;
 	cpu.m=1; cpu.t=16;
 },
@@ -2185,7 +2175,7 @@ call_nc_nn : function(){
 	var value=memory.readByte(cpu.pc+1);
 	var result= cpu.a-value;
 	if (result < 0){cpu.setCarryFlag();}
-	if(a&0x0F < value&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
+	if(cpu.a&0x0F < value&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
 	if (result === 0){cpu.setZeroFlag();}else{cpu.resetZeroFlag();}
 	cpu.setSubFlag();
 	cpu.m=2; cpu.t=8;
@@ -2193,7 +2183,7 @@ call_nc_nn : function(){
 
 //0xFF
  rst_38 : function(){
-	memory.writeWord(cpu.pc+1, sp);
+	memory.writeWord(cpu.pc+1, cpu.sp);
 	cpu.sp-=2;
 	cpu.pc=0x0038;
 	cpu.m=1; cpu.t=16;
@@ -2402,8 +2392,8 @@ call_nc_nn : function(){
 
 //0x10
  rl_b : function(){
-	var carry = carryFlag()?1:0;
-	if (b&0x80===0x80){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
+	var carry = cpu.carryFlag()?1:0;
+	if (cpu.b&0x80===0x80){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
 	cpu.b=cpu.b<<1;
 	cpu.b+=carry;
 	cpu.b&=0xFF;
@@ -2415,8 +2405,8 @@ call_nc_nn : function(){
 
 //0x11
  rl_c : function(){
-	var carry = carryFlag()?1:0;
-	if (c&0x80===0x80){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
+	var carry = cpu.carryFlag()?1:0;
+	if (cpu.c&0x80===0x80){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
 	cpu.c=cpu.c<<1;
 	cpu.c+=carry;
 	cpu.c&=0xFF;
@@ -2428,8 +2418,8 @@ call_nc_nn : function(){
 
 //0x12
  rl_d : function(){
-	var carry = carryFlag()?1:0;
-	if (d&0x80===0x80){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
+	var carry = cpu.carryFlag()?1:0;
+	if (cpu.d&0x80===0x80){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
 	cpu.d=cpu.d<<1;
 	cpu.d+=carry;
 	cpu.d&=0xFF;
@@ -2441,8 +2431,8 @@ call_nc_nn : function(){
 
 //0x13
  rl_e : function(){
-	var carry = carryFlag()?1:0;
-	if (e&0x80===0x80){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
+	var carry = cpu.carryFlag()?1:0;
+	if (cpu.e&0x80===0x80){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
 	cpu.e=cpu.e <<1;
 	cpu.e+=carry;
 	cpu.e&=0xFF;
@@ -2454,8 +2444,8 @@ call_nc_nn : function(){
 
 //0x14
  rl_h : function(){
-	var carry = carryFlag()?1:0;
-	if (h&0x80===0x80){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
+	var carry = cpu.carryFlag()?1:0;
+	if (cpu.h&0x80===0x80){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
 	cpu.h=cpu.h<<1;
 	cpu.h+=carry;
 	cpu.h&=0xFF;
@@ -2467,8 +2457,8 @@ call_nc_nn : function(){
 
 //0x15
  rl_l : function(){
-	var carry = carryFlag()?1:0;
-	if (l&0x80===0x80){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
+	var carry = cpu.carryFlag()?1:0;
+	if (cpu.l&0x80===0x80){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
 	cpu.l=cpu.l<<1;
 	cpu.l+=carry;
 	cpu.l&=0xFF;
@@ -2481,7 +2471,7 @@ call_nc_nn : function(){
 //0x16
  rl_hl : function(){
 	var value=memory.readByte(cpu.getAddr(cpu.h,cpu.l));
-	var carry = carryFlag()?1:0;
+	var carry = cpu.carryFlag()?1:0;
 	if (value&0x80===0x80){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
 	value=value<<1;
 	value+=carry;
@@ -2495,8 +2485,8 @@ call_nc_nn : function(){
 
 //0x17
  rl_a: function(){
-	var carry = carryFlag()?1:0;
-	if (a&0x80===0x80){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
+	var carry = cpu.carryFlag()?1:0;
+	if (cpu.a&0x80===0x80){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
 	cpu.a=cpu.a<<1;
 	cpu.a+=carry;
 	cpu.a&=0xFF;
@@ -2508,8 +2498,8 @@ call_nc_nn : function(){
 
 //0x18
  rr_b : function(){
-	var carry = carryFlag()?0x80:0;
-	if (b&0x01){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
+	var carry = cpu.carryFlag()?0x80:0;
+	if (cpu.b&0x01){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
 	cpu.b=cpu.b>>1;
 	cpu.b+=carry;
 	cpu.b&=0xFF;
@@ -2521,8 +2511,8 @@ call_nc_nn : function(){
 
 //0x19
  rr_c : function(){
-	var carry = carryFlag()?0x80:0;
-	if (c&0x01){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
+	var carry = cpu.carryFlag()?0x80:0;
+	if (cpu.c&0x01){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
 	cpu.c=cpu.c>>1;
 	cpu.c+=carry;
 	cpu.c&=0xFF;
@@ -2534,8 +2524,8 @@ call_nc_nn : function(){
 
 //0x1A
  rr_d : function(){
-	var carry = carryFlag()?0x80:0;
-	if (d&0x01){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
+	var carry = cpu.carryFlag()?0x80:0;
+	if (cpu.d&0x01){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
 	cpu.d=cpu.d>>1;
 	cpu.d+=carry;
 	cpu.d&=0xFF;
@@ -2548,8 +2538,8 @@ call_nc_nn : function(){
 
 //0x1B
  rr_e : function(){
-	var carry = carryFlag()?0x80:0;
-	if (c&0x01){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
+	var carry = cpu.carryFlag()?0x80:0;
+	if (cpu.c&0x01){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
 	cpu.e=cpu.e>>1;
 	cpu.e+=carry;
 	cpu.e&=0xFF;
@@ -2561,8 +2551,8 @@ call_nc_nn : function(){
 
 //0x1C
  rr_h : function(){
-	var carry = carryFlag()?0x80:0;
-	if (h&0x01){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
+	var carry = cpu.carryFlag()?0x80:0;
+	if (cpu.h&0x01){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
 	cpu.h=cpu.h>>1;
 	cpu.c+=carry;
 	cpu.c&=0xFF;
@@ -2574,8 +2564,8 @@ call_nc_nn : function(){
 
 //0x1D
  rr_l : function(){
-	var carry = carryFlag()?0x80:0;
-	if (l&0x01){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
+	var carry = cpu.carryFlag()?0x80:0;
+	if (cpu.l&0x01){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
 	cpu.l=cpu.l>>1;
 	cpu.l+=carry;
 	cpu.l&=0xFF;
@@ -2588,7 +2578,7 @@ call_nc_nn : function(){
 //0x1E
  rr_hl : function(){
 	var value=memory.readByte(cpu.getAddr(cpu.h,cpu.l));
-	var carry = carryFlag()?0x80:0;
+	var carry = cpu.carryFlag()?0x80:0;
 	if (value&0x01){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
 	value=value>>1;
 	value+=carry;
@@ -2602,8 +2592,8 @@ call_nc_nn : function(){
 
 //0x1F
  rr_a : function(){
-	var carry = carryFlag()?0x80:0;
-	if (a&0x01){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
+	var carry = cpu.carryFlag()?0x80:0;
+	if (cpu.a&0x01){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
 	cpu.a=cpu.a>>1;
 	cpu.a+=carry;
 	cpu.a&=0xFF;
@@ -2615,7 +2605,7 @@ call_nc_nn : function(){
 
 //0x20
  sla_b : function(){
-	if(b&0x80){setCarryBit();} else {resetCarryBit();}
+	if(cpu.b&0x80){cpu.setCarryBit();} else {cpu.resetCarryBit();}
 	cpu.b=cpu.b<<1;
 	cpu.b&=0xFF;
 	if(cpu.b===0){cpu.setZeroFlag();} else {cpu.resetZeroFlag();}
@@ -2626,7 +2616,7 @@ call_nc_nn : function(){
 
 //0x21
  sla_c : function(){
-	if(c&0x80){setCarryBit();} else {resetCarryBit();}
+	if(cpu.c&0x80){cpu.setCarryBit();} else {cpu.resetCarryBit();}
 	cpu.c=cpu.c<<1;
 	cpu.c&=0xFF;
 	if(cpu.c===0){cpu.setZeroFlag();} else {cpu.resetZeroFlag();}
@@ -2637,7 +2627,7 @@ call_nc_nn : function(){
 
 //0x22
  sla_d : function(){
-	if(d&0x80){setCarryBit();} else {resetCarryBit();}
+	if(cpu.d&0x80){cpu.setCarryBit();} else {cpu.resetCarryBit();}
 	cpu.d=cpu.d<<1;
 	cpu.d&=0xFF;
 	if(cpu.d===0){cpu.setZeroFlag();} else {cpu.resetZeroFlag();}
@@ -2648,7 +2638,7 @@ call_nc_nn : function(){
 
 //0x23
  sla_e : function(){
-	if(e&0x80){setCarryBit();} else {resetCarryBit();}
+	if(cpu.e&0x80){cpu.setCarryBit();} else {cpu.resetCarryBit();}
 	cpu.e=cpu.e<<1;
 	cpu.e&=0xFF;
 	if(cpu.e===0){cpu.setZeroFlag();} else {cpu.resetZeroFlag();}
@@ -2659,7 +2649,7 @@ call_nc_nn : function(){
 
 //0x24
  sla_h : function(){
-	if(e&0x80){setCarryBit();} else {resetCarryBit();}
+	if(cpu.e&0x80){cpu.setCarryBit();} else {cpu.resetCarryBit();}
 	cpu.h=cpu.h<<1;
 	cpu.h&=0xFF;
 	if(cpu.h===0){cpu.setZeroFlag();} else {cpu.resetZeroFlag();}
@@ -2670,7 +2660,7 @@ call_nc_nn : function(){
 
 //0x25
  sla_l : function(){
-	if(h&0x80){setCarryBit();} else {resetCarryBit();}
+	if(cpu.h&0x80){cpu.setCarryBit();} else {cpu.resetCarryBit();}
 	cpu.l=cpu.l<<1;
 	cpu.l&=0xFF;
 	if(cpu.l===0){cpu.setZeroFlag();} else {cpu.resetZeroFlag();}
@@ -2682,7 +2672,7 @@ call_nc_nn : function(){
 //0x26
  sla_hl : function(){
 	var value=memory.readByte(cpu.getAddr(cpu.h,cpu.l));
-	if(value&0x80){setCarryBit();} else {resetCarryBit();}
+	if(value&0x80){cpu.setCarryBit();} else {cpu.resetCarryBit();}
 	value<<1;
 	value&=0xFF;
 	memory.writeByte(value, cpu.getAddr(cpu.h,cpu.l));
@@ -2694,7 +2684,7 @@ call_nc_nn : function(){
 
 //0x27
  sla_a : function(){
-	if(a&0x80){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
+	if(cpu.a&0x80){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
 	cpu.a=cpu.a<<1;
 	cpu.a&=0xFF;
 	if(cpu.a===0){cpu.setZeroFlag();} else {cpu.resetZeroFlag();}
@@ -2705,8 +2695,8 @@ call_nc_nn : function(){
 
 //0x28
  sra_b : function(){
-	if (b&0x01){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
-	var msb=(b&0x80);
+	if (cpu.b&0x01){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
+	var msb=(cpu.b&0x80);
 	cpu.b=cpu.b>>1;
 	cpu.b|=msb;
 	if(cpu.b===0){cpu.setZeroFlag();} else {cpu.resetZeroFlag();}
@@ -2717,8 +2707,8 @@ call_nc_nn : function(){
 
 //0x29
  sra_c : function(){
-	if (c&0x01){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
-	var msb=(c&0x80);
+	if (cpu.c&0x01){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
+	var msb=(cpu.c&0x80);
 	cpu.c=cpu.c>>1;
 	cpu.c|=msb;
 	if(cpu.c===0){cpu.setZeroFlag();} else {cpu.resetZeroFlag();}
@@ -2729,8 +2719,8 @@ call_nc_nn : function(){
 
 //0x2A
  sra_d : function(){
-	if (d&0x01){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
-	var msb=(d&0x80);
+	if (cpu.d&0x01){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
+	var msb=(cpu.d&0x80);
 	cpu.d=cpu.d>>1;
 	cpu.d|=msb;
 	if(cpu.d===0){cpu.setZeroFlag();} else {cpu.resetZeroFlag();}
@@ -2741,8 +2731,8 @@ call_nc_nn : function(){
 
 //0x2B
  sra_e : function(){
-	if (e&0x01){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
-	var msb=(e&0x80);
+	if (cpu.e&0x01){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
+	var msb=(cpu.e&0x80);
 	cpu.e=cpu.e>>1;
 	cpu.e|=msb;
 	if(cpu.e===0){cpu.setZeroFlag();} else {cpu.resetZeroFlag();}
@@ -2753,8 +2743,8 @@ call_nc_nn : function(){
 
 //0x2C
  sra_h : function(){
-	if (h&0x01){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
-	var msb=(h&0x80);
+	if (cpu.h&0x01){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
+	var msb=(cpu.h&0x80);
 	cpu.h=cpu.h>>1;
 	cpu.h|=msb;
 	if(cpu.h===0){cpu.setZeroFlag();} else {cpu.resetZeroFlag();}
@@ -2765,8 +2755,8 @@ call_nc_nn : function(){
 
 //0x2D
  sra_l : function(){
-	if (l&0x01){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
-	var msb=(l&0x80);
+	if (cpu.l&0x01){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
+	var msb=(cpu.l&0x80);
 	cpu.l=cpu.l>>1;
 	cpu.l|=msb;
 	if(cpu.l===0){cpu.setZeroFlag();} else {cpu.resetZeroFlag();}
@@ -2791,8 +2781,8 @@ call_nc_nn : function(){
 
 //0x2F
  sra_a : function(){
-	if (a&0x01){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
-	var msb=(a&0x80);
+	if (cpu.a&0x01){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
+	var msb=(cpu.a&0x80);
 	cpu.a=cpu.a>>1;
 	cpu.a|=msb;
 	if(cpu.a===0){cpu.setZeroFlag();} else {cpu.resetZeroFlag();}
@@ -3015,7 +3005,7 @@ call_nc_nn : function(){
 
 //0x40
  bit_0_b : function(){
-	if(b&0x01){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.b&0x01){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3023,7 +3013,7 @@ call_nc_nn : function(){
 
 //0x41
  bit_0_c : function(){
-	if(c&0x01){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.c&0x01){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3031,7 +3021,7 @@ call_nc_nn : function(){
 
 //0x42
  bit_0_d : function(){
-	if(d&0x01){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.d&0x01){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3039,7 +3029,7 @@ call_nc_nn : function(){
 
 //0x43
  bit_0_e : function(){
-	if(e&0x01){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.e&0x01){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3047,7 +3037,7 @@ call_nc_nn : function(){
 
 //0x44
  bit_0_h : function() {
-	if(h&0x01){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.h&0x01){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3055,7 +3045,7 @@ call_nc_nn : function(){
 
 //0x45
  bit_0_l : function() {
-	if(l&0x01){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.l&0x01){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3072,7 +3062,7 @@ call_nc_nn : function(){
 
 //0x47
  bit_0_a : function() {
-	if(a&0x01){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.a&0x01){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3080,7 +3070,7 @@ call_nc_nn : function(){
 
 //0x48
  bit_1_b : function() {
-	if(b&0x02){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.b&0x02){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3088,7 +3078,7 @@ call_nc_nn : function(){
 
 //0x49
  bit_1_c : function() {
-	if(c&0x02){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.c&0x02){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3096,7 +3086,7 @@ call_nc_nn : function(){
 
 //0x4A
  bit_1_d : function() {
-	if(d&0x02){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.d&0x02){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3104,7 +3094,7 @@ call_nc_nn : function(){
 
 //0x4B
  bit_1_e : function() {
-	if(e&0x02){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.e&0x02){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3112,7 +3102,7 @@ call_nc_nn : function(){
 
 //0x4C
  bit_1_h : function() {
-	if(h&0x02){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.h&0x02){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3120,7 +3110,7 @@ call_nc_nn : function(){
 
 //0x4D
  bit_1_l : function() {
-	if(l&0x02){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.l&0x02){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3137,7 +3127,7 @@ call_nc_nn : function(){
 
 //0x4F
  bit_1_a : function() {
-	if(a&0x02){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.a&0x02){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3145,7 +3135,7 @@ call_nc_nn : function(){
 
 //0x50
  bit_2_b : function() {
-	if(b&0x04){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.b&0x04){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3153,7 +3143,7 @@ call_nc_nn : function(){
 
 //0x51
  bit_2_c : function() {
-	if(c&0x04){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.c&0x04){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3161,7 +3151,7 @@ call_nc_nn : function(){
 
 //0x52
  bit_2_d : function() {
-	if(d&0x04){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.d&0x04){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3169,7 +3159,7 @@ call_nc_nn : function(){
 
 //0x53
  bit_2_e : function() {
-	if(e&0x04){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.e&0x04){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3177,7 +3167,7 @@ call_nc_nn : function(){
 
 //0x54
  bit_2_h : function() {
-	if(h&0x04){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.h&0x04){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3185,7 +3175,7 @@ call_nc_nn : function(){
 
 //0x55
  bit_2_l : function() {
-	if(l&0x04){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.l&0x04){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3194,7 +3184,7 @@ call_nc_nn : function(){
 //0x56
  bit_2_hl : function() {
 	var value=memory.readByte(cpu.getAddr(cpu.h,cpu.l));
-	if(value&0x04){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.value&0x04){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=16;
@@ -3202,7 +3192,7 @@ call_nc_nn : function(){
 
 //0x57
  bit_2_a : function() {
-	if(a&0x04){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.a&0x04){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3210,7 +3200,7 @@ call_nc_nn : function(){
 
 //0x58
  bit_3_b : function() {
-	if(b&0x08){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.b&0x08){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3218,7 +3208,7 @@ call_nc_nn : function(){
 
 //0x59
  bit_3_c : function() {
-	if(c&0x08){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.c&0x08){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3226,7 +3216,7 @@ call_nc_nn : function(){
 
 //0x5A
  bit_3_d : function() {
-	if(d&0x08){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.d&0x08){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3234,7 +3224,7 @@ call_nc_nn : function(){
 
 //0x5B
  bit_3_e : function() {
-	if(e&0x08){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.e&0x08){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3242,7 +3232,7 @@ call_nc_nn : function(){
 
 //0x5C
  bit_3_h : function() {
-	if(h&0x08){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.h&0x08){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3250,7 +3240,7 @@ call_nc_nn : function(){
 
 //0x5D
  bit_3_l : function() {
-	if(l&0x08){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.l&0x08){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3267,7 +3257,7 @@ call_nc_nn : function(){
 
 //0x5F
  bit_3_a : function() {
-	if(a&0x08){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.a&0x08){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3275,7 +3265,7 @@ call_nc_nn : function(){
 
 //0x60
  bit_4_b : function() {
-	if(b&0x10){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.b&0x10){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3283,7 +3273,7 @@ call_nc_nn : function(){
 
 //0x61
  bit_4_c : function() {
-	if(c&0x10){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.c&0x10){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3291,7 +3281,7 @@ call_nc_nn : function(){
 
 //0x62
  bit_4_d : function() {
-	if(d&0x10){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.d&0x10){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3299,7 +3289,7 @@ call_nc_nn : function(){
 
 //0x63
  bit_4_e : function() {
-	if(e&0x10){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.e&0x10){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3307,7 +3297,7 @@ call_nc_nn : function(){
 
 //0x64
  bit_4_h : function() {
-	if(h&0x10){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.h&0x10){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3315,7 +3305,7 @@ call_nc_nn : function(){
 
 //0x65
  bit_4_l : function() {
-	if(l&0x10){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.l&0x10){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3333,7 +3323,7 @@ call_nc_nn : function(){
 
 //0x67
  bit_4_a : function() {
-	if(a&0x10){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.a&0x10){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3341,7 +3331,7 @@ call_nc_nn : function(){
 
 //0x68
  bit_5_b : function() {
-	if(b&0x20){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.b&0x20){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3349,7 +3339,7 @@ call_nc_nn : function(){
 
 //0x69
  bit_5_c : function() {
-	if(c&0x20){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.c&0x20){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3357,7 +3347,7 @@ call_nc_nn : function(){
 
 //0x6A
  bit_5_d : function() {
-	if(d&0x20){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.d&0x20){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3365,7 +3355,7 @@ call_nc_nn : function(){
 
 //0x6B
  bit_5_e : function() {
-	if(e&0x20){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.e&0x20){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3373,7 +3363,7 @@ call_nc_nn : function(){
 
 //0x6C
  bit_5_h : function() {
-	if(h&0x20){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.h&0x20){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3381,7 +3371,7 @@ call_nc_nn : function(){
 
 //0x6D
  bit_5_l : function() {
-	if(l&0x20){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.l&0x20){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3398,7 +3388,7 @@ call_nc_nn : function(){
 
 //0x6F
  bit_5_a : function() {
-	if(a&0x20){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.a&0x20){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3406,7 +3396,7 @@ call_nc_nn : function(){
 
 //0x70
  bit_6_b : function() {
-	if(b&0x40){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.b&0x40){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3414,7 +3404,7 @@ call_nc_nn : function(){
 
 //0x71
  bit_6_c : function() {
-	if(c&0x40){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.c&0x40){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3422,7 +3412,7 @@ call_nc_nn : function(){
 
 //0x72
  bit_6_d : function() {
-	if(d&0x40){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.d&0x40){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3430,7 +3420,7 @@ call_nc_nn : function(){
 
 //0x73
  bit_6_e : function() {
-	if(e&0x40){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.e&0x40){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3438,7 +3428,7 @@ call_nc_nn : function(){
 
 //0x74
  bit_6_h : function() {
-	if(h&0x40){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.h&0x40){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3446,7 +3436,7 @@ call_nc_nn : function(){
 
 //0x75
  bit_6_l : function() {
-	if(l&0x40){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.l&0x40){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3463,7 +3453,7 @@ call_nc_nn : function(){
 
 //0x77
  bit_6_a : function() {
-	if(a&0x40){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.a&0x40){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3471,7 +3461,7 @@ call_nc_nn : function(){
 
 //0x78
  bit_7_b : function() {
-	if(b&0x80){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.b&0x80){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3479,7 +3469,7 @@ call_nc_nn : function(){
 
 //0x79
  bit_7_c : function() {
-	if(c&0x80){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.c&0x80){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3487,7 +3477,7 @@ call_nc_nn : function(){
 
 //0x7A
  bit_7_d : function() {
-	if(d&0x80){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.d&0x80){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3495,7 +3485,7 @@ call_nc_nn : function(){
 
 //0x7B
  bit_7_e : function() {
-	if(e&0x80){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.e&0x80){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3503,7 +3493,7 @@ call_nc_nn : function(){
 
 //0x7C
  bit_7_h : function() {
-	if(h&0x80){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.h&0x80){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3511,7 +3501,7 @@ call_nc_nn : function(){
 
 //0x7D
  bit_4_l : function() {
-	if(l&0x80){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.l&0x80){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -3528,7 +3518,7 @@ call_nc_nn : function(){
 
 //0x7F
  bit_7_a : function() {
-	if(a&0x80){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
+	if(cpu.a&0x80){cpu.resetZeroFlag();} else {cpu.setZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
 	cpu.m=2; cpu.t=8;
@@ -4394,11 +4384,12 @@ call_nc_nn : function(){
  getAddr : function(a,b){ //finds and returns combined address of two 8bit registers
 	var addr = a;
 	addr=addr<<8;
-	addr|=cpu.b;
+	addr|=b;
 	return addr;
 },
 
  ex : function(opcode){
+	console.log('executing: MEMORY[', (cpu.pc).toString(16), '], ', oneByteInstructions[MEMORY[cpu.pc]].name, ', hex ', MEMORY[cpu.pc].toString(16));
 	oneByteInstructions[opcode]();
 	cpu.pc+=cpu.m;
 	cpu.pc&=0xFFFF;
@@ -4406,21 +4397,34 @@ call_nc_nn : function(){
 },
 
 showState: function(){
-	console.log('a: ', cpu.a);
-	console.log('b: ', cpu.b);
-	console.log('c: ', cpu.c);
-	console.log('d: ', cpu.d);
-	console.log('e: ', cpu.e);
-	console.log('h: ', cpu.h);
-	console.log('l: ', cpu.l);
-	console.log('a: ', cpu.a);
-	console.log('f: ', cpu.f);
-	console.log('sp: ', cpu.sp);
-	console.log('pc: ', cpu.pc);
+
+	console.log('current state: ');
+	console.log('a: ', cpu.a.toString(16));
+	console.log('b: ', cpu.b.toString(16));
+	console.log('c: ', cpu.c.toString(16));
+	console.log('d: ', cpu.d.toString(16));
+	console.log('e: ', cpu.e.toString(16));
+	console.log('h: ', cpu.h.toString(16));
+	console.log('l: ', cpu.l.toString(16));
+	console.log('a: ', cpu.a.toString(16));
+	console.log('f: ', cpu.f.toString(16));
+	console.log('sp: ', cpu.sp.toString(16));
+	console.log('pc: ', cpu.pc.toString(16));
 	console.log('i: ', cpu.i);
 	console.log('m: ', cpu.m);
 	console.log('t: ', cpu.t);
+	},
+	
+signDecode: function(val){
+	var neg=val&0x80
+	if(neg){
+	val=~val&0xFF;
+	val++;
+	val=-val;
 	}
+	return val;
+},
+
 };
 
 //instruction arrays
@@ -4448,7 +4452,7 @@ showState: function(){
 	cpu.inc_d,
 	cpu.dec_d,
 	cpu.ld_d_n,
-	cpu.rl_a,
+	cpu.rla,
 	cpu.jr_n,
 	cpu.add_hl_de,
 	cpu.ld_a_de,
@@ -4558,33 +4562,32 @@ showState: function(){
 	cpu.add_a_d,
 	cpu.add_a_e,
 	cpu.add_a_h,
-	cpu.res_7_a,
 	cpu.add_a_l,
 	cpu.add_a_hl,
 	cpu.add_a_a,
-	cpu.adc_a_b,
-	cpu.adc_a_c,
-	cpu.adc_a_d,
-	cpu.adc_a_e,
-	cpu.adc_a_h,
-	cpu.adc_a_l,
-	cpu.adc_a_hl,
+	cpu.adc_b_a,
+	cpu.adc_c_a,
+	cpu.adc_d_a,
+	cpu.adc_e_a,
+	cpu.adc_h_a,
+	cpu.adc_l_a,
+	cpu.adc_hl_a,
 	cpu.adc_a_a,
-	cpu.sub_a_b,	//0x90
-	cpu.sub_a_c,
-	cpu.sub_a_d,
-	cpu.sub_a_e,
-	cpu.sub_a_h,
-	cpu.sub_a_l,
-	cpu.sub_a_hl,
+	cpu.sub_b_a,	//0x90
+	cpu.sub_c_a,
+	cpu.sub_d_a,
+	cpu.sub_e_a,
+	cpu.sub_h_a,
+	cpu.sub_l_a,
+	cpu.sub_hl_a,
 	cpu.sub_a_a,
-	cpu.sbc_a_b,
-	cpu.sbc_a_c,
-	cpu.sbc_a_d,
-	cpu.sbc_a_e,
-	cpu.sbc_a_h,
-	cpu.sbc_a_l,
-	cpu.sbc_a_hl,
+	cpu.sbc_b_a,
+	cpu.sbc_c_a,
+	cpu.sbc_d_a,
+	cpu.sbc_e_a,
+	cpu.sbc_h_a,
+	cpu.sbc_l_a,
+	cpu.sbc_hl_a,
 	cpu.sbc_a_a,
 	cpu.and_b,		//0xA0
 	cpu.and_c,
