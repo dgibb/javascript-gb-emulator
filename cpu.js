@@ -228,7 +228,7 @@ cpu.t=4
 
 //0x16
  ld_d_n : function(){
-	cpu.h=memory.readByte(cpu.pc+1);
+	cpu.d=memory.readByte(cpu.pc+1);
 	cpu.m=2; cpu.t=8;
 },
 
@@ -400,8 +400,8 @@ cpu.t=4
 //0x28
  jr_z_n : function(){
 	if (cpu.zeroFlag()){
-		cpu.cpu.pc+=cpu.signDecode(memory.readByte(cpu.pc+1));
-		cpu.t=12; cpu.m=0;
+		cpu.pc+=cpu.signDecode(memory.readByte(cpu.pc+1));
+		cpu.t=12; cpu.m=2;
 		}
 	else{
 		cpu.m=2; cpu.t=8;
@@ -422,7 +422,7 @@ cpu.t=4
 
 //0x2A
  ldi_hl : function(){
-	cpu.a=readByte(cpu.getAddr(cpu.h,cpu.l));
+	cpu.a=memory.readByte(cpu.getAddr(cpu.h,cpu.l));
 	cpu.l++;
 	cpu.l&=0xFF;
 	if (cpu.l===0){
@@ -522,7 +522,7 @@ cpu.t=4
 
 //0x35
  dec_hl_ : function(){
-	 data = readByte(cpu.getAddr(cpu.h,cpu.l))
+	 data = memory.readByte(cpu.getAddr(cpu.h,cpu.l))
 	datcpu.a--;
 	memory.writeByte(data, addr);
 	if (datcpu.a===0){cpu.setZeroFlag();}else{cpu.resetZeroFlag();}
@@ -1005,9 +1005,10 @@ jr_c_n : function(){
  add_a_b : function(){
 	var result = cpu.a+cpu.b;
 	if (result > 255){cpu.setCarryFlag();}
+	result&=0xFF;
 	if(((cpu.a&0x0F) + (cpu.b&0x0F))&0x10){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
 	if (result === 0){cpu.setZeroFlag();}else{cpu.resetZeroFlag();}
-	cpu.a=(result&0x00ff);
+	cpu.a=result;
 	cpu.resetSubFlag();
 	cpu.m=1; cpu.t=4;
 	
@@ -1017,9 +1018,10 @@ jr_c_n : function(){
   add_a_c : function(){
 	var result =cpu.a+cpu.c;
 	if (result > 255){cpu.setCarryFlag();}
+	result&=0xFF;
 	if(((cpu.a&0x0F) + (cpu.c&0x0F))&0x10){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
 	if (result === 0){cpu.setZeroFlag();}else{cpu.resetZeroFlag();}
-	cpu.a=(result&0x00ff);
+	cpu.a=result;
 	cpu.resetSubFlag();
 	cpu.m=1; cpu.t=4;
 	
@@ -1029,9 +1031,10 @@ jr_c_n : function(){
  add_a_d : function(){
 	var result = cpu.a+cpu.d;
 	if (result > 255){cpu.setCarryFlag();}
+	result&=0xFF;
 	if(((cpu.a&0x0F) + (cpu.d&0x0F))&0x10){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
 	if (result === 0){cpu.setZeroFlag();}else{cpu.resetZeroFlag();}
-	cpu.a=(result&0x00ff);
+	cpu.a=result;
 	cpu.resetSubFlag();
 	cpu.m=1; cpu.t=4;
 },
@@ -1040,9 +1043,10 @@ jr_c_n : function(){
  add_a_e : function(){
 	var result =cpu.a+cpu.e;
 	if (result & 0xff00){cpu.setCarryFlag();}
+	result&=0xFF;
 	if(((cpu.a&0x0F) + (cpu.e&0x0F))&0x10){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
 	if (result === 0){cpu.setZeroFlag();}else{cpu.resetZeroFlag();}
-	cpu.a=(result&0x00ff);
+	cpu.a=result;
 	cpu.resetSubFlag();
 	cpu.m=1; cpu.t=4;
 },
@@ -1051,9 +1055,10 @@ jr_c_n : function(){
  add_a_h : function(){
 	 var result = cpu.a+cpu.h;
 	if (result > 255){cpu.setCarryFlag();}
+	result&=0xFF;
 	if(((cpu.a&0x0F) + (cpu.h&0x0F))&0x10){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
 	if (result === 0){cpu.setZeroFlag();}else{cpu.resetZeroFlag();}
-	cpu.a=(result&0x00ff);
+	cpu.a=result;
 	cpu.resetSubFlag();
 	cpu.m=1; cpu.t=4;
 },
@@ -1062,9 +1067,10 @@ jr_c_n : function(){
  add_a_l : function(){
 	 var result = cpu.a+cpu.l;
 	if (result > 255){cpu.setCarryFlag();}
+	result&=0xFF;
 	if(((cpu.a&0x0F) + (cpu.l&0x0F))&0x10){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
 	if (result === 0){cpu.setZeroFlag();}else{cpu.resetZeroFlag();}
-	cpu.a=(result&0x00ff);
+	cpu.a=result;
 	cpu.resetSubFlag();
 	cpu.m=1; cpu.t=4;
 	
@@ -1072,12 +1078,13 @@ jr_c_n : function(){
 
 //0x86
  add_a_hl : function(){
-	var value = readByte(cpu.getAddr(cpu.h,cpu.l));
-	var result = cpu.a+value;
+	var value = memory.readByte(cpu.getAddr(cpu.h,cpu.l));
+	var result = (cpu.a+value);
 	if (result & 0xff00){cpu.setCarryFlag();}
-	if(((cpu.a&0x0F) + (cpu.l&0x0F))&0x10){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
+	result&=0xFF;
+	if(((cpu.a&0x0F) + (value&0x0F))&0x10){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
 	if (result === 0){cpu.setZeroFlag();}else{cpu.resetZeroFlag();}
-	cpu.a=(result&0x00ff);
+	cpu.a=result;
 	cpu.resetSubFlag();
 	cpu.m=1; cpu.t=8;
 	
@@ -1087,9 +1094,10 @@ jr_c_n : function(){
  add_a_a : function(){
 	var result = cpu.a + cpu.a;
 	if (result & 0xff00){cpu.setCarryFlag();}
+	result&=0xFF;
 	if(((cpu.a&0x0F) + (cpu.a&0x0F))&0x10){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
 	if (result === 0){cpu.setZeroFlag();}else{cpu.resetZeroFlag();}
-	cpu.a=(result&0x00ff);
+	cpu.a=result;
 	cpu.resetSubFlag();
 	cpu.m=1; cpu.t=4;
 
@@ -1168,7 +1176,7 @@ jr_c_n : function(){
 
 //0x8E
  adc_hl_a : function(){
-	var value =readByte(cpu.getAddr(cpu.h,cpu.l));
+	var value =memory.readByte(cpu.getAddr(cpu.h,cpu.l));
 	var result =cpu.a+value;
 	if(cpu.carryFlag()){result+=1;}
 	if (result & 0xff00){cpu.setCarryFlag();}
@@ -1195,7 +1203,7 @@ jr_c_n : function(){
  sub_b_a : function(){
 	var result =cpu.a-cpu.b;
 	if (result < 0){cpu.setCarryFlag();}
-	if(a&0x0F < d&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
+	if(cpu.a&0x0F < cpu.d&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
 	if (result === 0){cpu.setZeroFlag();}else{cpu.resetZeroFlag();}
 	cpu.a=(result&0x00ff);
 	cpu.setSubFlag();
@@ -1206,7 +1214,7 @@ jr_c_n : function(){
  sub_c_a : function(){
 	 var result =cpu.a-cpu.c;
 	if (result < 0){cpu.setCarryFlag();}
-	if(a&0x0F < d&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
+	if(cpu.a&0x0F < cpu.d&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
 	if (result === 0){cpu.setZeroFlag();}else{cpu.resetZeroFlag();}
 	cpu.a=(result&0x00ff);
 	cpu.setSubFlag();
@@ -1217,7 +1225,7 @@ jr_c_n : function(){
  sub_d_a : function(){
 	 var result =cpu.a-cpu.d;
 	if (result < 0){cpu.setCarryFlag();}
-	if(a&0x0F < d&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
+	if(cpu.a&0x0F < cpu.d&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
 	if (result === 0){cpu.setZeroFlag();}else{cpu.resetZeroFlag();}
 	cpu.a=(result&0x00ff);
 	cpu.setSubFlag();
@@ -1228,7 +1236,7 @@ jr_c_n : function(){
  sub_e_a : function(){
 	 var result =cpu.a-cpu.e;
 	if (result < 0){cpu.setCarryFlag();}
-	if(a&0x0F < d&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
+	if(cpu.a&0x0F < cpu.d&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
 	if (result === 0){cpu.setZeroFlag();}else{cpu.resetZeroFlag();}
 	cpu.a=(result&0x00ff);
 	cpu.setSubFlag();
@@ -1239,7 +1247,7 @@ jr_c_n : function(){
  sub_h_a : function(){
 	 var result =cpu.a-cpu.h;
 	if (result < 0){cpu.setCarryFlag();}
-	if(a&0x0F < d&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
+	if(cpu.a&0x0F < cpu.d&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
 	if (result === 0){cpu.setZeroFlag();}else{cpu.resetZeroFlag();}
 	cpu.a=(result&0x00ff);
 	cpu.setSubFlag();
@@ -1250,7 +1258,7 @@ jr_c_n : function(){
  sub_l_a : function(){
 	var result = cpu.a-cpu.l;
 	if (result < 0){cpu.setCarryFlag();}
-	if(a&0x0F < d&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
+	if(cpu.a&0x0F < cpu.d&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
 	if (result === 0){cpu.setZeroFlag();}else{cpu.resetZeroFlag();}
 	cpu.a=(result&0x00ff);
 	cpu.setSubFlag();
@@ -1439,7 +1447,7 @@ jr_c_n : function(){
 
 //0xA6
  and_hl : function(){
-	cpu.a&=readByte(cpu.getAddr(cpu.h,cpu.l));
+	cpu.a&=memory.readByte(cpu.getAddr(cpu.h,cpu.l));
 	if (cpu.a===0){cpu.setZeroFlag();}else{cpu.resetZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.setHalfFlag();
@@ -1599,7 +1607,7 @@ jr_c_n : function(){
 
 //0xB6
  or_hl : function(){
-	cpu.a|=readByte(cpu.getAddr(cpu.h,cpu.l));;
+	cpu.a|=memory.readByte(cpu.getAddr(cpu.h,cpu.l));;
 	if (cpu.a===0){cpu.setZeroFlag();}else{cpu.resetZeroFlag();}
 	cpu.resetSubFlag();
 	cpu.resetHalfFlag();
@@ -1648,7 +1656,7 @@ jr_c_n : function(){
 
 //0xBB
  cp_e : function(){
-	 result= cpu.a-cpu.e;
+	var result= cpu.a-cpu.e;
 	if (result < 0){cpu.setCarryFlag();}
 	if(cpu.a&0x0F < e&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
 	if (result === 0){cpu.setZeroFlag();}else{cpu.resetZeroFlag();}
@@ -1658,7 +1666,7 @@ jr_c_n : function(){
 
 //0xBC
  cp_h : function(){
-	 result= cpu.a-cpu.h;
+	var result= cpu.a-cpu.h;
 	if (result < 0){cpu.setCarryFlag();}
 	if(cpu.a&0x0F < h&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
 	if (result === 0){cpu.setZeroFlag();}else{cpu.resetZeroFlag();}
@@ -1668,7 +1676,7 @@ jr_c_n : function(){
 
 //0xBD
  cp_l : function(){
-	 result= cpu.a-cpu.l;
+	var result= cpu.a-cpu.l;
 	if (result < 0){cpu.setCarryFlag();}
 	if(cpu.a&0x0F < l&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
 	if (result === 0){cpu.setZeroFlag();}else{cpu.resetZeroFlag();}
@@ -1678,7 +1686,7 @@ jr_c_n : function(){
 
 //0xBE
  cp_hl : function(){
-	var value=readbyte(cpu.getAddr(cpu.h,cpu.l));
+	var value=memory.readByte(cpu.getAddr(cpu.h,cpu.l));
 	var result= cpu.a-value;
 	if (result < 0){cpu.setCarryFlag();}
 	if(cpu.a&0x0F < value&0x0F){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
@@ -1755,7 +1763,7 @@ jr_c_n : function(){
 
 //0xC6
  add_a_n : function(){
-	var value =readByte(cpu.pc+1);
+	var value =memory.readByte(cpu.pc+1);
 	var result =cpu.a+value;
 	if (result > 255){cpu.setCarryFlag();}
 	if(((cpu.a&0x0F) + (cpu.l&0x0F))&0x10){cpu.setHalfFlag();}else {cpu.resetHalfFlag();}
@@ -2027,7 +2035,7 @@ call_nc_nn : function(){
 
 //0xE6
  and_n : function(){
-	var value=readByte(cpu.pc+1)
+	var value=memory.readByte(cpu.pc+1)
 	cpu.a&=value;
 	if (cpu.a===0){cpu.setZeroFlag();}else{cpu.resetZeroFlag();}
 	cpu.resetSubFlag();
@@ -2046,7 +2054,7 @@ call_nc_nn : function(){
 
 //0xE8
  add_sp_d : function(){
-	var value = readByte(cpu.pc+1);
+	var value = memory.readByte(cpu.pc+1);
 	cpu.sp+=value;
 	cpu.resetZeroFlag();
 	cpu.resetSubFlag();
@@ -2069,7 +2077,7 @@ call_nc_nn : function(){
 
 //0xEE
  xor_n : function(){
-	var value=readByte(cpu.pc+1);
+	var value=memory.readByte(cpu.pc+1);
 	cpu.a^=value;
 	if (cpu.a===0){cpu.setZeroFlag();}else{cpu.resetZeroFlag();}
 	cpu.resetSubFlag();
@@ -4406,7 +4414,6 @@ showState: function(){
 	console.log('e: ', cpu.e.toString(16));
 	console.log('h: ', cpu.h.toString(16));
 	console.log('l: ', cpu.l.toString(16));
-	console.log('a: ', cpu.a.toString(16));
 	console.log('f: ', cpu.f.toString(16));
 	console.log('sp: ', cpu.sp.toString(16));
 	console.log('pc: ', cpu.pc.toString(16));
