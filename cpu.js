@@ -4401,7 +4401,10 @@ call_nc_nn : function(){
 	oneByteInstructions[opcode]();
 	cpu.pc+=cpu.m;
 	cpu.pc&=0xFFFF;
-	cpu.showState();
+	display.tCount+=cpu.t;
+	display.step();
+//	cpu.showState();
+//	display.showState();
 },
 
 showState: function(){
