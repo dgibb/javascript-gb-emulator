@@ -4403,8 +4403,8 @@ call_nc_nn : function(){
 	cpu.pc&=0xFFFF;
 	display.tCount+=cpu.t;
 	display.step();
-//	cpu.showState();
-//	display.showState();
+	cpu.showState();
+	display.showState();
 },
 
 showState: function(){
@@ -4433,6 +4433,14 @@ signDecode: function(val){
 	val=-val;
 	}
 	return val;
+},
+
+executeBIOS: function(){
+	while(cpu.pc!=0x0100){
+		cpu.ex(MEMORY[cpu.pc]);
+	}
+	MEMORY.splice(0,256);
+	MEMORY=biosPlaceholder.concat(MEMORY);
 },
 
 };
