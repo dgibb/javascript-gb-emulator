@@ -1,11 +1,99 @@
 //David Gibb
 
 memory = {
+	
+mbcr1:0,
+mbcr2:0,
+mbcr3:0,
+mbcr4:0,
 
 //functions
 
 readByte: function(addr){
+	
+	switch (addr&0xF000){
+	
+	case 0x4000:
+	case 0x5000:
+	case 0x6000:
+	case 0x7000:
+	
+	if(!mbcr4){
+		return romBanks[mbcr3>>6][mbcr2&0x1F][addr-0x4000]
+	}else{
+		return romBanks[0][mbcr2&0x1F][addr-0x4000]
+	}
+	break;
+
+	case 0x8000:
+	case 0x9000:	
+		
+		if(addr>=0x8000 && addr<0x9000){
+			return tileset1[addr-0x8000];
+		}else if(addr>=0x9000 && addr<0x9800){
+			return tileset0[addr-0x8800]=data;
+		}else if(addr>=0x9800 && addr<0x9C00){
+			addr-=0x9800;
+			return tilemap0[Math.floor(addr/32)][addr%32];
+		}else if(addr>=0x9C00 && addr<0xA000){
+			addr-=0x9C00;
+			return tilemap1[Math.floor(addr/32)][addr%32];
+		}
+		break;
+		
+	
+	case 0xA000:
+	case 0xB000:
+	if(mbcr4){
+		return ramBanks[mbcr2&0x3][addr-0xA000]
+	}else{
+		return ramBanks[0][addr-0xA000]
+	}
+	break;
+	
+	case 0xF000:
+	
+		switch (addr&0xFF00){
+			
+			case 0xFF00:
+			switch(addr){
+			
+				case 0xFF42:
+				return display.scrollY;
+				break;
+			
+				case 0xFF43:
+				return display.scrollX;
+				break;
+			
+				case 0xFF44:
+				return display;
+				break;
+			
+				default:
+				return MEMORY[addr];
+				break;				
+			}
+			
+			case 0xFE00:
+			
+				if(addr>=0xFE00 && addr<0xFEA0){
+				return spriteData[addr-0xFE00];
+				}else{
+					return MEMORY[addr];
+				}
+				break;
+				
+			default:
+			return MEMORY[addr];
+			break;
+			
+			}
+	default:
 	return MEMORY[addr];
+	break;
+	
+	}
 },
 	
 readWord: function(addr){
@@ -16,7 +104,124 @@ readWord: function(addr){
 },
 	
 writeByte: function(data, addr){
-	MEMORY[addr]=data;
+	
+	switch (addr&0xF000){
+	
+	case 0x0000:
+	case 0x1000:
+		mbcr1=data;
+		break;
+		
+	case 0x2000:
+	case 0x3000:
+		mbcr2=data;
+		break;
+		
+	case 0x4000:
+	case 0x5000:
+		mbcr3=data;
+		break;
+	
+	case 0x6000:
+	case 0x7000:
+		mbcr4=data;
+		break;
+		
+	case 0x8000:
+	case 0x9000:	
+		
+		if(addr>=0x8000 && addr<0x8800){
+			tileset1[addr-0x8000]=data;
+		}else if(addr>=0x8800 && addr<0x9000){
+			tileset1[addr-0x8000]=data;
+			tileset0[addr-0x8800]=data;
+		}else if(addr>=0x9000 && addr<0x9800){
+			tileset0[addr-0x8800]=data;
+		}else if(addr>=0x9800 && addr<0x9C00){
+			addr-=0x9800;
+			tileMap0[Math.floor(addr/32)][addr%32]=data;
+		}else if(addr>=0x9C00 && addr<0xA000){
+			addr-=0x9C00;
+			tileMap1[Math.floor(addr/32)][addr%32]=data;
+		}
+		break;
+		
+	case 0xA000:
+	case 0xB000:
+		if (mcbr4){
+			ramBanks[mbcr3&0x03][addr-0xA000]=data
+		} else{
+		MEMORY[addr]=data;
+		}
+		break;
+	
+	case 0xF000:
+		switch (addr&0xFF00){
+			
+			case 0xFF00:
+			switch(addr){
+				
+				case 0xFF42:
+				display.scrollY=data;
+				break;
+			
+				case 0xFF43:
+				display.scrollX=data;
+				break;
+			
+				case 0xFF44:
+				display.line=data;
+				break;
+			
+				case 0xFF47:
+				MEMORY[0xFF47]=data;
+				for (var i=0;i<4;i++){
+				var ref = (data>>(8+2*i-6))&0x03;
+					switch (ref){
+				
+						case 0:
+						paletteRef[i]=255;
+						break;
+					
+						case 1:
+						paletteRef[i]=192;
+						break;
+					
+						case 2:
+						paletteRef[i]=96;
+						break;
+					
+						case 3:
+						paletteRef[i]=0;
+						break;
+				
+				
+					}
+				}
+				break;
+				
+				default:
+				MEMORY[addr]=data;
+				break;
+			
+			}
+			case 0xFE00:
+			if(addr>=0xFE00 && addr<0xFEA0){
+				spriteData[addr-0xFE00]=data;
+			}else{
+				MEMORY[addr]=data;
+			}
+			break;
+			
+			default:
+			MEMORY[addr=data];
+			break;
+		}
+		
+	default:
+		MEMORY[addr]=data;
+		break;
+	}
 },
 	
 writeWord: function(data, addr){
@@ -27,23 +232,31 @@ writeWord: function(data, addr){
 },
 
 loadROM: function(){
-var input = document.getElementById('romFileInput');
-var file = input.files[0];
-var reader = new FileReader;
-reader.readAsArrayBuffer(file);
-reader.onloadend=memory.loadEndHandler(reader.result);
+	var input = document.getElementById('romFileInput');
+	var file = input.files[0];
+	var reader = new FileReader;
+	reader.onload=function(e){
+		var byteArray=new Uint8Array(reader.result);
+		console.log(byteArray[0])
+		for (var i=0;i<16384;i++){
+			romBank0[i]=byteArray[i];
+		}
+		biosPlaceholder=romBank0.splice(0,256);
+		MEMORY=MEMORY.concat(romBank0);
+		for (i=0;i<4;i++){
+			for (var j=0; j<31;j++){
+				romBanks[i].push(new Array(16384));
+			}
+		}
+		for (i=16384; i<byteArray.length;i++){
+			romBanks[Math.floor(i/524288)][Math.floor((i%524288)/16384)][i%16384]=byteArray[i];
+		
+		}
+		display.canvasInit();
+		console.log('done loading');
+		}
+	reader.readAsArrayBuffer(file);
 },
-
-loadEndHandler:function(result){
-var byteArray=new Uint8Array(result);
-memory.handleROM(byteArray);
-},
-
-handleROM: function(){
-	
-	
-	
-}
 
 };
 
@@ -64,12 +277,9 @@ MEMORY = [
 0xDD, 0xDC, 0x99, 0x9F, 0xBB, 0xB9, 0x33, 0x3E, 0x3c, 0x42, 0xB9, 0xA5, 0xB9, 0xA5, 0x42, 0x4C,
 0x21, 0x04, 0x01, 0x11, 0xA8, 0x00, 0x1A, 0x13, 0xBE, 0x20, 0xFE, 0x23, 0x7D, 0xFE, 0x34, 0x20,
 0xF5, 0x06, 0x19, 0x78, 0x86, 0x23, 0x05, 0x20, 0xFB, 0x86, 0x20, 0xFE, 0x3E, 0x01, 0xE0, 0x50,
-0x00, 0xC3, 0x50, 0x01, 0xCE, 0xED, 0x66, 0x66, 0xCC, 0x0D, 0x00, 0x0B, 0x03, 0x73, 0x00, 0x83,
-0x00, 0x0C, 0x00, 0x0D, 0x00, 0x08, 0x11, 0x1F, 0x88, 0x89, 0x00, 0x0E, 0xDC, 0xCC, 0x6E, 0xE6,
-0xDD, 0xDD, 0xD9, 0x99, 0xBB, 0xBB, 0x67, 0x63, 0x6E, 0x0E, 0xEC, 0xCC, 0xDD, 0xDC, 0x99, 0x9F,
-0xBB, 0xB9, 0x33, 0x3E, 0x5A, 0x45, 0x4C, 0x44, 0x41, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-0X00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x04, 0x02, 0x01, 0x01, 0x00, 0x6C, 0x47, 0xB7,
-0XCD, 0X81, 0X28];
+];
 
-ROMBanks=[];
-RAMBanks=[];
+biosPlaceholder=[];
+romBank0=[];
+romBanks=[[[0]],[[0]],[[0]],[[0]]];
+ramBanks=[[0],[0],[0],[0]];
