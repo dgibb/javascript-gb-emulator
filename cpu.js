@@ -15,12 +15,9 @@ cpu = {
  pc:0,
  sp:0,
 
-//clocks
+//counters
  m:0,
  t:0,
-
-//interupts
- i:0,
 
 //instructions
 
@@ -32,9 +29,8 @@ cpu.t=4
 
 //0x01
  ld_bc_nn : function(){
-	cpu.b=memory.readByte(cpu.pc);
+	cpu.b=memory.readByte(cpu.pc+2);
 	cpu.c=memory.readByte(cpu.pc+1);
-	cpu.pc+=2;
 	cpu.m=3;
 	cpu.t=12;
 },
@@ -235,8 +231,8 @@ cpu.t=4
 //0x17
  rla : function(){
 	var carry = cpu.carryFlag()?1:0;
-	if (cpu.a&0x80===0x80){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
-	cpu.a<<1;
+	if (cpu.a&0x80){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
+	cpu.a=cpu.a<<1;
 	cpu.a+=carry;
 	cpu.a&=0xFF;
 	cpu.resetZeroFlag();
@@ -1718,9 +1714,9 @@ jr_c_n : function(){
 
 //0xC1
  pop_bc : function(){
-	cpu.sp+=2;
 	cpu.c=memory.readByte(cpu.sp);
 	cpu.b=memory.readByte(cpu.sp+1);
+	cpu.sp+=2;
 	cpu.m=1; cpu.t=12;
 },
 
@@ -1736,7 +1732,6 @@ jr_c_n : function(){
 
 //0xC3
  jp_nn : function(){
-	console.log(memory.readWord(cpu.pc+1));
 	cpu.pc=memory.readWord(cpu.pc+1);
 	cpu.m=0; cpu.t=16;
 },
@@ -1744,8 +1739,8 @@ jr_c_n : function(){
 //0xC4
  call_nz_nn : function(){
 	if(!cpu.zeroFlag()){
-	memory.writeWord(cpu.pc+3,cpu.sp);
 	cpu.sp-=2;
+	memory.writeWord(cpu.pc+3,cpu.sp);
 	cpu.pc=memory.readWord(cpu.pc+1);
 	cpu.t=24; cpu.m=0;
 	}else{
@@ -1755,9 +1750,9 @@ jr_c_n : function(){
 
 //0xC5
  push_bc : function(){
+	cpu.sp-=2;
 	memory.writeByte(cpu.b, cpu.sp+1);
 	memory.writeByte(cpu.c,cpu.sp);
-	cpu.sp-=2;
 	cpu.m=1; cpu.t=16;
 },
 
@@ -1775,8 +1770,8 @@ jr_c_n : function(){
 
 //0xC7
  rst_0 : function(){
-	memory.writeWord(cpu.pc+1, cpu.sp);
 	cpu.sp-=2;
+	memory.writeWord(cpu.pc+1, cpu.sp);
 	cpu.pc=0x0000;
 	cpu.m=1; cpu.t=16;
 },
@@ -1784,8 +1779,8 @@ jr_c_n : function(){
 //0xC8
  ret_z : function(){
 	if(cpu.zeroFlag()){
-    cpu.sp+=2;
 	cpu.pc=memory.readWord(cpu.sp);
+	cpu.sp+=2;
 	cpu.t=20; cpu.m=0;
 	}else{
 	cpu.t=8;
@@ -1795,8 +1790,8 @@ jr_c_n : function(){
 
 //0xC9
  ret : function(){
-	cpu.sp+=2;
 	cpu.pc=memory.readWord(cpu.sp);
+	cpu.sp+=2;
 	cpu.m=0; cpu.t=16;
 },
 
@@ -1818,8 +1813,8 @@ jr_c_n : function(){
 //0xCC
  call_z_nn : function(){
 	if(cpu.zeroFlag()){
-	memory.writeWord(cpu.pc+3, cpu.sp);
 	cpu.sp-=2;
+	memory.writeWord(cpu.pc+3, cpu.sp);
 	cpu.pc=memory.readWord(cpu.pc+1);
 	cpu.t=24; cpu.m=0;
 	}else{
@@ -1829,8 +1824,8 @@ jr_c_n : function(){
 
 //0xCD
  call_nn: function(){
-	memory.writeWord(cpu.pc+3,cpu.sp);
 	cpu.sp-=2;
+	memory.writeWord(cpu.pc+3,cpu.sp);
 	cpu.pc=memory.readWord(cpu.pc+1);
 	cpu.t=24; cpu.m=0;
 },
@@ -1850,8 +1845,8 @@ jr_c_n : function(){
 
 //0xCF
  rst_8 : function(){
-	memory.writeWord(cpu.pc+1, cpu.sp);
 	cpu.sp-=2;
+	memory.writeWord(cpu.pc+1, cpu.sp);
 	cpu.pc=0x0008;
 	cpu.m=1; cpu.t=16;
 },
@@ -1859,8 +1854,8 @@ jr_c_n : function(){
 //0xD0
  ret_nc : function(){
 	if (!cpu.carryFlag()){
-	cpu.sp+=2;
 	cpu.pc=memory.readWord(cpu.sp);
+	cpu.sp+=2;
 	cpu.m=0; cpu.t=20;
 	}else{
 	cpu.t=8;
@@ -1870,9 +1865,9 @@ jr_c_n : function(){
 
 //0xD1
  pop_de : function(){
-	cpu.sp+=2;
 	cpu.e=memory.readByte(cpu.sp);
 	cpu.d=memory.readByte(cpu.sp+1);
+	cpu.sp+=2
 	cpu.m=1; cpu.t=12;
 },
 
@@ -1889,14 +1884,14 @@ jr_c_n : function(){
 //0xD3, 0XDB, 0xDD, 0xE3, 0xE4, 0xEB, 0xEC, 0xED, 0xF, 0xFC, 0xFD
  unused : function(){
 	var iv = memory.readByte(cpu.pc);
-	console.log("invalid opcode ", iv, "at ", cpu.pc);
+	console.log("invalid opcode ", iv.toString(16), "at ", cpu.pc.toString(16));
 },
 
 //0xD4
 call_nc_nn : function(){
 	if(!cpu.carryFlag()){
-	memory.writeWord(cpu.pc+3,cpu.sp);
 	sp-=2;
+	memory.writeWord(cpu.pc+3,cpu.sp);
 	cpu.pc=memory.readWord(cpu.pc+1);
 	cpu.t=24; cpu.m=0;
 	}else{
@@ -1906,9 +1901,9 @@ call_nc_nn : function(){
 
 //0xD5
  push_de : function(){
+	sp-=2;
 	memory.writeByte(cpu.d, cpu.sp+1);
 	memory.writeByte(cpu.e,cpu.sp);
-	cpu.sp-=2;
 	cpu.m=1; cpu.t=16;
 },
 
@@ -1926,8 +1921,8 @@ call_nc_nn : function(){
 
 //0xD7
  rst_10 : function(){
-	memory.writeWord(cpu.pc+1, cpu.sp);
 	cpu.sp-=2;
+	memory.writeWord(cpu.pc+1, cpu.sp);
 	cpu.pc=0x0010;
 	cpu.m=1; cpu.t=16;
 },
@@ -1935,8 +1930,8 @@ call_nc_nn : function(){
 //0xD8
  ret_c : function(){
 	if(cpu.carryFlag()){
-    cpu.sp+=2;
 	cpu.pc=memory.readWord(cpu.sp);
+	cpu.sp+=2;
 	cpu.t=20; cpu.m=0;
 	}else{
 	cpu.t=8; cpu.m=1;
@@ -1945,9 +1940,9 @@ call_nc_nn : function(){
 
 //0xD9
  reti : function(){
-	cpu.i=true;
-	cpu.sp+=2;
+	MEMORY[0xFFFF]|=0x01;
 	cpu.pc=memory.readWord(cpu.sp);
+	cpu.sp+=2;
 	cpu.m=1; cpu.t=16;
 },
 
@@ -1967,8 +1962,8 @@ call_nc_nn : function(){
 //0xDC
  call_c_nn : function(){
 	if(cpu.carryFlag()){
-	memory.writeWord(cpu.pc+3, cpu.sp);
 	sp-=2;
+	memory.writeWord(cpu.pc+3, cpu.sp);
 	cpu.pc=memory.readWord(cpu.pc+1);
 	cpu.t=24; cpu.m=0;
 	}else{
@@ -1994,8 +1989,8 @@ call_nc_nn : function(){
 
 //0xDF
  rst_18 : function(){
-	memory.writeWord(cpu.pc+1, cpu.sp);
 	cpu.sp-=2;
+	memory.writeWord(cpu.pc+1, cpu.sp);
 	cpu.pc=0x0018;
 	cpu.m=1; cpu.t=16;
 },
@@ -2009,9 +2004,9 @@ call_nc_nn : function(){
 	
 //0xE1
  pop_hl : function(){
-	cpu.sp+=2;
 	cpu.l=memory.readByte(cpu.sp);
 	cpu.h=memory.readByte(cpu.sp+1);
+	cpu.sp+=2;
 	cpu.m=1; cpu.t=12;
 },
 
@@ -2027,9 +2022,9 @@ call_nc_nn : function(){
 
 //0xE5
  push_hl : function(){
+	cpu.sp-=2;
 	memory.writeByte(cpu.h, cpu.sp+1);
 	memory.writeByte(cpu.l,cpu.sp);
-	cpu.sp-=2;
 	cpu.m=1; cpu.t=16;
 },
 
@@ -2046,8 +2041,8 @@ call_nc_nn : function(){
 
 //0xE7
  rst_20 : function(){
-	memory.writeWord(cpu.pc+1, cpu.sp);
 	cpu.sp-=2;
+	memory.writeWord(cpu.pc+1, cpu.sp);
 	cpu.pc=0x0020;
 	cpu.m=1; cpu.t=16;
 },
@@ -2088,8 +2083,8 @@ call_nc_nn : function(){
 
 //0xEF
  rst_28 : function(){
-	memory.writeWord(cpu.pc+1, cpu.sp);
 	cpu.sp-=2;
+	memory.writeWord(cpu.pc+1, cpu.sp);
 	cpu.pc=0x0028;
 	cpu.m=1; cpu.t=16;
 },
@@ -2103,14 +2098,14 @@ call_nc_nn : function(){
 
 //0xF1
  pop_af : function(){
-	cpu.sp+=2;
 	cpu.f=memory.readByte(cpu.sp);
 	cpu.a=memory.readByte(cpu.sp+1);
+	cpu.sp+=2;
 	cpu.m=1; cpu.t=12;	
 },
 	
 //0xF2
- ld_a_c : function(){
+ ldh_a_c : function(){
 	var addr=0xFF00|cpu.c;
 	cpu.a=memory.readByte(addr);
 	cpu.m=1; cpu.t=8;
@@ -2118,15 +2113,15 @@ call_nc_nn : function(){
 
 //0xF3
  di : function(){
-	cpu.i=false;
+	MEMORY[0xFFFF]&=0xFE;
 	cpu.m=1; cpu.t=4;
 },
 
 //0xF5
  push_af : function(){
+	cpu.sp-=2;
 	memory.writeByte(cpu.a, cpu.sp+1);
 	memory.writeByte(cpu.f,cpu.sp);
-	cpu.sp-=2;
 	cpu.m=1; cpu.t=16;
 },
 
@@ -2142,8 +2137,8 @@ call_nc_nn : function(){
 
 //0xF8
  rst_30 : function(){
-	memory.writeWord(cpu.pc+1, cpu.sp);
 	cpu.sp-=2;
+	memory.writeWord(cpu.pc+1, cpu.sp);
 	cpu.pc=0x0030;
 	cpu.m=1; cpu.t=16;
 },
@@ -2174,7 +2169,7 @@ call_nc_nn : function(){
 
 //0xFC
  ei: function(){
-	cpu.i=true;
+	MEMORY[0xFFFF]|=0x01;
 	cpu.m=1; cpu.t=4;
 },
 
@@ -2191,8 +2186,8 @@ call_nc_nn : function(){
 
 //0xFF
  rst_38 : function(){
-	memory.writeWord(cpu.pc+1, cpu.sp);
 	cpu.sp-=2;
+	memory.writeWord(cpu.pc+1, cpu.sp);
 	cpu.pc=0x0038;
 	cpu.m=1; cpu.t=16;
 },
@@ -2414,7 +2409,7 @@ call_nc_nn : function(){
 //0x11
  rl_c : function(){
 	var carry = cpu.carryFlag()?1:0;
-	if (cpu.c&0x80===0x80){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
+	if (cpu.c&0x80){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
 	cpu.c=cpu.c<<1;
 	cpu.c+=carry;
 	cpu.c&=0xFF;
@@ -2427,7 +2422,7 @@ call_nc_nn : function(){
 //0x12
  rl_d : function(){
 	var carry = cpu.carryFlag()?1:0;
-	if (cpu.d&0x80===0x80){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
+	if (cpu.d&0x80){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
 	cpu.d=cpu.d<<1;
 	cpu.d+=carry;
 	cpu.d&=0xFF;
@@ -2440,7 +2435,7 @@ call_nc_nn : function(){
 //0x13
  rl_e : function(){
 	var carry = cpu.carryFlag()?1:0;
-	if (cpu.e&0x80===0x80){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
+	if (cpu.e&0x80){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
 	cpu.e=cpu.e <<1;
 	cpu.e+=carry;
 	cpu.e&=0xFF;
@@ -2453,7 +2448,7 @@ call_nc_nn : function(){
 //0x14
  rl_h : function(){
 	var carry = cpu.carryFlag()?1:0;
-	if (cpu.h&0x80===0x80){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
+	if (cpu.h&0x80){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
 	cpu.h=cpu.h<<1;
 	cpu.h+=carry;
 	cpu.h&=0xFF;
@@ -2466,7 +2461,7 @@ call_nc_nn : function(){
 //0x15
  rl_l : function(){
 	var carry = cpu.carryFlag()?1:0;
-	if (cpu.l&0x80===0x80){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
+	if (cpu.l&0x80){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
 	cpu.l=cpu.l<<1;
 	cpu.l+=carry;
 	cpu.l&=0xFF;
@@ -2480,7 +2475,7 @@ call_nc_nn : function(){
  rl_hl : function(){
 	var value=memory.readByte(cpu.getAddr(cpu.h,cpu.l));
 	var carry = cpu.carryFlag()?1:0;
-	if (value&0x80===0x80){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
+	if (value&0x80){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
 	value=value<<1;
 	value+=carry;
 	value&=0xFF;
@@ -2494,7 +2489,7 @@ call_nc_nn : function(){
 //0x17
  rl_a: function(){
 	var carry = cpu.carryFlag()?1:0;
-	if (cpu.a&0x80===0x80){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
+	if (cpu.a&0x80){cpu.setCarryFlag();} else {cpu.resetCarryFlag();}
 	cpu.a=cpu.a<<1;
 	cpu.a+=carry;
 	cpu.a&=0xFF;
@@ -4397,14 +4392,25 @@ call_nc_nn : function(){
 },
 
  ex : function(opcode){
-	console.log('executing: MEMORY[', (cpu.pc).toString(16), '], ', oneByteInstructions[MEMORY[cpu.pc]].name, ', hex ', MEMORY[cpu.pc].toString(16));
+	
 	oneByteInstructions[opcode]();
 	cpu.pc+=cpu.m;
 	cpu.pc&=0xFFFF;
 	display.tCount+=cpu.t;
 	display.step();
+	//cpu.showState();
+	//display.showState();
+},
+
+runInstruction: function(){
+	cpu.showFunc();
+	cpu.ex(memory.readByte(cpu.pc));
 	cpu.showState();
 	display.showState();
+},
+
+showFunc: function(){
+	console.log('executing: MEMORY[', (cpu.pc).toString(16), '], ', oneByteInstructions[memory.readByte(cpu.pc)].name, ', hex ', MEMORY[cpu.pc].toString(16));
 },
 
 showState: function(){
@@ -4420,7 +4426,6 @@ showState: function(){
 	console.log('f: ', cpu.f.toString(16));
 	console.log('sp: ', cpu.sp.toString(16));
 	console.log('pc: ', cpu.pc.toString(16));
-	console.log('i: ', cpu.i);
 	console.log('m: ', cpu.m);
 	console.log('t: ', cpu.t);
 	},
@@ -4435,12 +4440,13 @@ signDecode: function(val){
 	return val;
 },
 
-executeBIOS: function(){
+executeBios: function(){
 	while(cpu.pc!=0x0100){
-		cpu.ex(MEMORY[cpu.pc]);
+		cpu.ex(memory.readByte(cpu.pc));
 	}
 	MEMORY.splice(0,256);
 	MEMORY=biosPlaceholder.concat(MEMORY);
+	console.log('BIOS executed!');
 },
 
 };
@@ -4689,7 +4695,7 @@ executeBIOS: function(){
 	cpu.rst_28,
 	cpu.ldh_a_n,	//0xF0
 	cpu.pop_af,
-	cpu.unused,
+	cpu.ldh_a_c,
 	cpu.di,
 	cpu.unused,
 	cpu.push_af,
