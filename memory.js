@@ -67,7 +67,7 @@ readByte: function(addr){
 				break;
 			
 				case 0xFF44:
-				return display;
+				return display.line;
 				break;
 			
 				default:
@@ -131,12 +131,12 @@ writeByte: function(data, addr){
 	case 0x9000:	
 		
 		if(addr>=0x8000 && addr<0x8800){
-			tileset1[addr-0x8000]=data;
+			tileSet1[addr-0x8000]=data;
 		}else if(addr>=0x8800 && addr<0x9000){
-			tileset1[addr-0x8000]=data;
-			tileset0[addr-0x8800]=data;
+			tileSet1[addr-0x8000]=data;
+			tileSet0[addr-0x8800]=data;
 		}else if(addr>=0x9000 && addr<0x9800){
-			tileset0[addr-0x8800]=data;
+			tileSet0[addr-0x8800]=data;
 		}else if(addr>=0x9800 && addr<0x9C00){
 			addr-=0x9800;
 			tileMap0[Math.floor(addr/32)][addr%32]=data;
@@ -176,27 +176,32 @@ writeByte: function(data, addr){
 				case 0xFF47:
 				MEMORY[0xFF47]=data;
 				for (var i=0;i<4;i++){
-				var ref = (data>>(8+2*i-6))&0x03;
+				console.log('storing ', data, '&0x03 to data[', i, ']' );
+				var ref = data&0x03;
+				console.log('ref = ', ref);
 					switch (ref){
 				
 						case 0:
 						paletteRef[i]=255;
+						console.log('stored 255 to data[', i, ']' );
 						break;
 					
 						case 1:
 						paletteRef[i]=192;
+						console.log('stored 192 to data[', i, ']' );
 						break;
 					
 						case 2:
 						paletteRef[i]=96;
+						console.log('stored 96 to data[', i, ']' );
 						break;
 					
 						case 3:
 						paletteRef[i]=0;
+						console.log('stored 0 to data[', i, ']' );
 						break;
-				
-				
 					}
+				data=data>>2;
 				}
 				break;
 				
@@ -234,6 +239,9 @@ writeWord: function(data, addr){
 loadROM: function(){
 	var input = document.getElementById('romFileInput');
 	var file = input.files[0];
+	if (file===undefined){
+		alert("Please Select a File");
+	} else{
 	var reader = new FileReader;
 	reader.onload=function(e){
 		var byteArray=new Uint8Array(reader.result);
@@ -253,9 +261,19 @@ loadROM: function(){
 		
 		}
 		display.canvasInit();
-		console.log('done loading');
+		console.log('canvas initialized');
+		memory.memoryInit();
+		console.log('memory initialized');
+		cpu.executeBios();
 		}
 	reader.readAsArrayBuffer(file);
+	}
+},
+
+memoryInit: function(){
+	for(var i=256; i<0xFFFF;i++){
+		MEMORY[i]=0x00;
+	}
 },
 
 };
