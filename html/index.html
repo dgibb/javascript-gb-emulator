@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>JavaScript Gameboy Emulator</title>
+    <link rel="stylesheet" type="text/css" href="/Users/Dave/Documents/Github/Bootstrap/css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="../css/CSS.css">
+  </head>
+  <body>
+  <div class="flex-container">
+    <div class="side-bar">
+      <h1 id="name">David <br> Gibb</h1>
+      <div id="contact-info">
+		<p>Email: 
+		<a href="mailto:dgibb802@gmail.com">dgibb802@gmail.com</a>
+		</p>
+		<br>
+		<p>Github: <a href="http://github.com/dgibb">http://github.com/dgibb</a></p>
+		<br>
+		<p>Phone: 978-479-7501</p>
+	  </div>
+	  <button onclick="location.href='about.html'">ABOUT</button>
+	  <button onclick="location.href='resume.html'">RESUME</button>
+	  <button onclick="location.href='index.html'">PROJECTS</button>
+	  <div class="sidebar-bottom"></div>
+    </div>
+
+    <div class="main-content">
+	
+	<div class="title">
+		<h1>JavaScript Gameboy Emulator</h1>
+	</div>
+	
+	<div class="screen-container">
+		<canvas id="screen" width="160" height="140">
+	</div>
+	
+	<div class="controls-container">
+		<div class='jumbotron container' id='outer'>
+			<div class='jumbotron container inner top'>
+				<input type="file" id="romFileInput" name="file[]" class='btn btn-lg btn-default'>
+				<button id="load-ROM" onClick=memory.loadROM();>Play ROM</button>
+			</div>
+			<div class='jumbotron container inner'>
+				<h2>Controls</h2>
+				<div class='col-lg-6 col-md-6 col-sm-6 col-xs-6'>
+					<ul id="controls-left">
+						<li>A: A</li>
+						<li>Start: Enter</li>
+						<li>Up: Up Arrow</li>
+						<li>Down: Down Arrow</li>
+					</ul>
+				</div>
+				<div class='col-lg-6 col-md-6 col-sm-6 col-xs-6'>
+					<ul id="controls-right">
+						<li>B: B</li>
+						<li>Select: Shift</li>
+						<li>Left: Left Arrow</li>
+						<li>Right: Right Arrow</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	</div>
+</div>
+	
+	
+	<script src="../js/input.js"></script>
+	<script src="../js/cpu.js"></script>
+	<script src="../js/memory.js"></script>
+	<script src="../js/display.js"></script>
+  	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script src="/Users/Dave/Documents/Github/Bootstrap/js/bootstrap.min.js"></script>
+	<script>
+	window.onkeydown=input.keyDown;
+	window.onkeyup=input.keyUp;
+	window.onload=cpu.init;
+	</script>
+  </body>
+</html>
