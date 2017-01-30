@@ -170,10 +170,24 @@ border-left: 1px solid rgba(0,0,0,.4);
 }
 
 input #romFileInput{
-background-color:#F2F0EE;
-flex:1;
-max-width:50%;
+	flex:1;
+	max-width:50%;
+}
 
+.btn-primary{
+	color:#F2F0EE;
+	border-radius:0px;
+	background-color:#1b1b1b;
+}
+
+.btn-primary:hover{
+background-color:#2b2b2b;
+color:#FFFFFF;
+}
+
+.btn-primary:active{
+background-color:#2b2b2b;
+color:#FFFFFF;
 }
 
 #load-ROM{
@@ -205,4 +219,8 @@ max-width:50%;
 	background-size:cover;
 	height:100%;
 	border:1px solid #000;
+}
+
+#reset-button{
+	display:none;
 }

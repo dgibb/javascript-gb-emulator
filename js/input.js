@@ -1,34 +1,36 @@
 //David Gibb
 
 input={
+
+keys:[0xFF,0xFF],	
 	
  keyDown: function(e){
-		console.log(e.keyCode);
+		MEMORY[0xFF0F]|=0x10;
+		//if (cpu.stop=1){emulator.runGame();}
+		//console.log(e.keyCode);
     	switch(e.keyCode)
 	{
-            case 65:  MEMORY[0xFF00] &= 0xE; break;//A
-            case 83:  MEMORY[0xFF00] &= 0xD; break;//B
-            case 38:  MEMORY[0xFF00] &= 0xB; break;//up
-            case 40:  MEMORY[0xFF00] &= 0x7; break;//down
-            case 37:  MEMORY[0xFF00] &= 0xE; break;//left
-            case 39:  MEMORY[0xFF00] &= 0xD; break;//right
-            case 13:  MEMORY[0xFF00] &= 0xB; break;//Start
-            case 16:  MEMORY[0xFF00] &= 0x7; break;//Select
-			case 114: cpu.runInstruction();  break;
+			case 65: input.keys[1] &= 0xE; break;//A
+            case 83: input.keys[1] &= 0xD; break;//B
+            case 38: input.keys[0] &= 0xB; break;//up
+            case 40: input.keys[0] &= 0x7; break;//Down
+            case 37: input.keys[0] &= 0xD; break;//Left
+            case 39: input.keys[0] &= 0xE; break;//Right
+            case 13: input.keys[1] &= 0x7; break;//Start
+            case 16: input.keys[1] &= 0xB; break;//Select
 	}
 },
 
     keyUp: function(e){
-		console.log(e.keyCode);
     	switch(e.keyCode){
-            case 65: MEMORY[0xFF00] |= 0x1; break;//A
-            case 83: MEMORY[0xFF00] |= 0x2; break;//B
-            case 38: MEMORY[0xFF00] |= 0x4; break;//up
-            case 40: MEMORY[0xFF00] |= 0x8; break;//Down
-            case 37: MEMORY[0xFF00] |= 0x1; break;//Left
-            case 39: MEMORY[0xFF00] |= 0x2; break;//Right
-            case 13: MEMORY[0xFF00] |= 0x4; break;//Start
-            case 16: MEMORY[0xFF00] |= 0x8; break;//Select
+			case 65:  input.keys[1] |= 0x1; break;//A
+            case 83:  input.keys[1] |= 0x2; break;//B
+            case 38:  input.keys[0] |= 0x4; break;//up
+            case 40:  input.keys[0] |= 0x8; break;//down
+            case 37:  input.keys[0] |= 0x2; break;//left
+            case 39:  input.keys[0] |= 0x1; break;//right
+            case 13:  input.keys[1] |= 0x8; break;//Start
+            case 16:  input.keys[1] |= 0x4; break;//Select
 		}
     },
 
